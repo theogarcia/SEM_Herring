@@ -4,7 +4,7 @@ library(readr)
 library(ggplot2)
 library(mgcv)
 library(qgam)
-library(visreg)
+library(visreg) #package gam
 library(quantreg)
 library(gridExtra)
 library(piecewiseSEM)
