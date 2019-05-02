@@ -1,4 +1,4 @@
-setwd("C:/Users/moi/Desktop/Stage/Script/SEM_Herring")
+setwd("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring")
 #### Packages ####
 library(readr)
 library(ggplot2)
