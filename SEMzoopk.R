@@ -1,10 +1,6 @@
 library(readr)
-library(ggplot2)
 library(mgcv)
-library(qgam)
-library(visreg) 
 library(quantreg)
-library(gridExtra)
 library(piecewiseSEM)
 
 data <- read.csv("data_1.csv", header=T, sep=";",dec=".")
@@ -17,7 +13,6 @@ datazoopk<-data.frame(na.omit(cbind(T_S,Cond_H0,Cal_fin,H_0,years)))
 
 
 pairs(datazoopk)
-
 
 
 ##### Linear Quantile regression #####
@@ -65,4 +60,20 @@ SEM2<-psem(lm(Cond_H0~T_S+Cal_fin),
 )
 summary(SEM2)
 
-AIC(SEM1,SEM2)
+SEM3<-psem(lm(Cond_H0~Cal_fin),
+           lm(Cal_fin~T_S),
+           
+           data=datazoopk
+           
+)
+summary(SEM3)
+
+
+
+SEM4<-psem(lm(Cond_H0~T_S),
+           lm(Cal_fin~T_S),
+           
+           data=datazoopk
+           
+)
+summary(SEM4)
