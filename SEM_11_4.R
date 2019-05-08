@@ -8,6 +8,7 @@ library(visreg) #package gam
 library(quantreg)
 library(gridExtra)
 library(piecewiseSEM)
+library(Hmisc)
 #### Data ####
 data <- read.csv("data_1.csv", header=T, sep=";",dec=".")
 attach(data)
@@ -27,13 +28,20 @@ c<-large_cod[c(2:length(large_cod),NA)] #Lagged t-1 vector
 
 d<-data$rat_Ca_C[c(2:length(data$rat_Ca_C),NA)] #Lagged t-1 vector
 
+e<-Lag(C_cH2,-1)
+
 dataSEM<-data.frame(na.omit(cbind(years,c,d,a,b,H_R2)))
 colnames(dataSEM)<-c("years","large_codlag","rat_Ca_Clag","H_0lag","C_cHlag","H_R2")
+
+dataSEM<-data.frame(na.omit(cbind(years,c,d,a,H_R2,e)))
+colnames(dataSEM)<-c("years","large_codlag","rat_Ca_Clag","H_0lag","H_R2","C_cHlag")
+
 attach(dataSEM)
 
 pairs(dataSEM)
 
 ##### Visualization of simple relationships ####
+
 
 p1 <- ggplot(data=dataSEM, aes(x=large_codlag, y=C_cHlag))+
   geom_point()+
@@ -80,13 +88,17 @@ dev.off()
 model1<-rq(H_R2~get(name), tau=0.95)
 names<-c("C_cHlag","H_0lag")
 windows()
-par(mfrow=c(2, 1))
+par(mfrow=c(2, 2))
 for (name in names) {
   plot(H_R2~get(name), data=dataSEM, xlab=name,ylab="Herring recruitment")
   abline(rq(H_R2~get(name), tau=0.95),col="red")
   abline(rq(H_R2~get(name), tau=0.9),col="orange")
   abline(rq(H_R2~get(name), tau=0.8),col="darkgreen")
-  abline(lm(H_R2~get(name)),col="black")}
+  abline(lm(H_R2~get(name)),col="black")
+  
+  }
+plot.new()
+plot.new()
 dev.off()
 
 
