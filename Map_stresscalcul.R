@@ -1,20 +1,55 @@
-library(rWind)
-library(raster)
-library(rworldmap)
-library(gdistance)
-library(fields)
-library(lubridate)
-library(shape)
-library(RNCEP)
-library(abind)
-
+####Work directory ####
 setwd("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring")
+####Library ####
+library(REdaS)
+library(SDMTools)
+library(RNCEP)
+#####Choose the angle of the projection in radian ####
+angle<-pi/4
+#####Compile functions of projection and download of NCEP data #####
+calcul_projection<-function(Z){
+  
+  if(Z[2]>0 & Z[1]>0){#2positifs
+    
+    beta<-atan2(Z[2],Z[1])
+    alpha<-beta-angle
+    pz<-cos(alpha)*sqrt((Z[1]^2)+(Z[2]^2))
+    
+    
+  } else if(Z[2]<0 & Z[1]>0){#yneg,xpos
+    
+    beta_prim2<-atan2(abs(Z[2]),abs(Z[1]))
+    beta<-2*pi-beta_prim2
+    alpha<-beta-angle
+    pz<-cos(alpha)*sqrt((Z[1]^2)+(Z[2]^2))
+    
+    
+    
+    
+  }else if(Z[2]>0 & Z[1]<0){ #ypos,xneg
+    
+    beta_prim3<-atan2(abs(Z[2]),abs(Z[1]))
+    beta<-pi-beta_prim3
+    alpha<-beta-angle
+    pz<-cos(alpha)*sqrt((Z[1]^2)+(Z[2]^2))
+    
+    
+    
+  }else { #xpos,y
+    
+    beta<-atan2(abs(Z[2]),abs(Z[1]))+pi
+    
+    alpha<-beta-angle
+    pz<-cos(alpha)*sqrt((Z[1]^2)+(Z[2]^2))
+    
+    
+  }
+  
+}
 
-#### Download data from NCEP ####
 NCEP.gather.surface2<-function (variable, months.minmax, years.minmax, lat.minmax, 
                                 lon.minmax, reanalysis2 = FALSE, return.units = TRUE, increments = NULL, 
-                                pb = NULL) 
-{
+                                pb = NULL) {
   if (any(c("air.sig995", "lftx.sfc", "lftx4.sfc", "omega.sig995", 
             "pottmp.sig995", "pr_wtr.eatm", "pres.sfc", "rhum.sig995", 
             "slp", "mslp", "uwnd.sig995", "vwnd.sig995") == variable) == 
@@ -239,92 +274,78 @@ NCEP.gather.surface2<-function (variable, months.minmax, years.minmax, lat.minma
   }
   return(out.wx.data)
 }
+#####Choose coordinates of big area to download ####
+xpos<-seq(3.5,14.5,by=0.5) ###x-axis
+ypos<-seq(62,68,by=0.5)    ###y-axis
+x<-rep(xpos,each=length(ypos))
+y<-rep(ypos,times=length(xpos))
+surface<-data.frame(x,y)
 
+#####Choose coordinates of polygon to select ####
+poly_cont<-data.frame(c(5,10,14.5,11.5,3.5),c(62,64,67.5,68,62))
+colnames(poly_cont)<-c("x","y")
+data<-pnt.in.poly(surface,poly_cont)
 
+inside<-data[which(data$pip==1),1:2]
+id_inside<-as.numeric(row.names(inside))
+####Loop to have mean and sd of stress#####
+duration<-1948:1950  
 
-uwind <- NCEP.gather.surface2(variable='uwnd.sig995',months.minmax=c(4,8), 
-                          years.minmax=c(1948,2018),lat.minmax=c(58,70), 
-                          lon.minmax=c(2,20))
-uwind_good<-uwind*-1  #Change way of vector west->east into east->west
+stress_mean<-rep(NA,times=length(duration))
+stress_sd<-rep(NA,times=length(duration))
 
-save(uwind_good, file = "uwind_good.RData")
-load("uwind_good.RData")
+for(i in duration)
+{vwind<- NCEP.gather.surface2(variable='vwnd.sig995',months.minmax=c(4,8), 
+                              years.minmax=c(i,i),lat.minmax=c(min(ypos),max(ypos)), 
+                              lon.minmax=c(min(xpos),max(xpos)),return.units = F)
 
-vwind <- NCEP.gather.surface2(variable='vwnd.sig995',months.minmax=c(4,8), 
-                              years.minmax=c(1948,2018),lat.minmax=c(58,70), 
-                              lon.minmax=c(2,20))
-vwind_good<-vwind*-1  #Change way of vector north->south into south->north
+print(paste(i,"v-wind downloaded"))
+uwind<- NCEP.gather.surface2(variable='uwnd.sig995',months.minmax=c(4,8), 
+                             years.minmax=c(i,i),lat.minmax=c(min(ypos),max(ypos)), 
+                             lon.minmax=c(min(xpos),max(xpos)),return.units = F)
+print(paste(i,"u-wind downloaded"))
 
-save(vwind_good, file = "vwind_good.RData")
-load("vwind_good.RData")
-## Have to change symbole of values
+vwind2<-vwind*-1
+uwind2<-uwind*-1
 
-##### Combine U-Wind and V-wind arrays ####
+####Mean
+vmean<-apply(vwind2,MARGIN=c(1,2),mean)
+umean<-apply(uwind2,MARGIN=c(1,2),mean)
 
-#Names of dimensions
-row.names<-unlist(dimnames(uwind_good)[1])
-column.names<-unlist(dimnames(uwind_good)[2])
-time.names<-unlist(dimnames(uwind_good)[3])
+row.names<-unlist(dimnames(vmean)[1])
+column.names<-unlist(dimnames(vmean)[2])
 axe.names<-c("U","v")
-liste.names<-list(row.names,column.names,time.names,axe.names)
+liste.names<-list(row.names,column.names,axe.names)
 
-## 4D array with U-wind and V-wind
-zwind<-array(c(uwind_good ,vwind_good),dim=c(dim(vwind_good),2),dimnames=liste.names)
+zwind<-array(c(umean ,vmean),dim=c(dim(vmean),2),dimnames=liste.names)
 
-##### Function to calcultate projection on angle in radians (here 45° or pi/4) #### 
-library(REdaS)
+stress_45<-as.vector(apply(zwind,MARGIN=c(1,2),FUN=calcul_projection))
 
-angle<-pi/4
+select<-stress_45[id_inside]
 
-calcul_projection<-function(Z){
-  
-  if(Z[2]>0 & Z[1]>0){#2positifs
-    
-    beta<-atan2(Z[2],Z[1])
-    alpha<-beta-angle
-    pz<-cos(alpha)*sqrt((Z[1]^2)+(Z[2]^2))
-    
-    
-  } else if(Z[2]<0 & Z[1]>0){#yneg,xpos
-    
-    beta_prim2<-atan2(abs(Z[2]),abs(Z[1]))
-    beta<-2*pi-beta_prim2
-    alpha<-beta-angle
-    pz<-cos(alpha)*sqrt((Z[1]^2)+(Z[2]^2))
-    
-    
-    
-    
-  }else if(Z[2]>0 & Z[1]<0){ #ypos,xneg
-    
-    beta_prim3<-atan2(abs(Z[2]),abs(Z[1]))
-    beta<-pi-beta_prim3
-    alpha<-beta-angle
-    pz<-cos(alpha)*sqrt((Z[1]^2)+(Z[2]^2))
-    
-    
-    
-  }else { #xpos,y
-    
-    beta<-atan2(abs(Z[2]),abs(Z[1]))+pi
-    
-    alpha<-beta-angle
-    pz<-cos(alpha)*sqrt((Z[1]^2)+(Z[2]^2))
-    
-    
-  }
-  
-  #print(paste("x=",Z[1],"y=",Z[2]))
-  #print(paste("beta=",beta))
-  #print(paste("alpha=",alpha))
-  #print(paste("pz=",pz))
-  #print(pz)
-  
+stress_mean[i-(min(duration-1))]<-mean(select)
+
+#### SD
+
+vsd<-apply(vwind2,MARGIN=c(1,2),sd)
+usd<-apply(uwind2,MARGIN=c(1,2),sd)
+
+row.names<-unlist(dimnames(vsd)[1])
+column.names<-unlist(dimnames(vsd)[2])
+axe.names<-c("U","v")
+liste.names<-list(row.names,column.names,axe.names)
+
+zwind_sd<-array(c(usd ,vsd),dim=c(dim(vsd),2),dimnames=liste.names)
+
+stress_45_sd<-as.vector(apply(zwind_sd,MARGIN=c(1,2),FUN=calcul_projection))
+
+select_sd<-stress_45_sd[id_inside]
+
+stress_sd[i-(min(duration)-1)]<-mean(select_sd)
+print(paste("Mean and sd of",i,"are calculated"))
+
 }
 
-
-#### Stress calculation ####
-stress_45<-apply(zwind,MARGIN=c(1,2,3),FUN=calcul_projection)
-
-
-
+####Save data ####
+save(stress_sd, file = "stress_sd.RData")
+save(stress_mean, file = "stress_mean.RData")
