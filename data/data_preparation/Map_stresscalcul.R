@@ -1,5 +1,3 @@
-####Work directory ####
-setwd("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring")
 ###################################################################
 ####Function to calculate projection of wind on a defined angle####
 ###################################################################
