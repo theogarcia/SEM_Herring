@@ -13,6 +13,12 @@ library(Hmisc)
 data <- read.csv("data_1.csv", header=T, sep=";",dec=".")
 attach(data)
 
+data[which(data$years>1947),dim(data)[2]+1]<-stress_mean
+colnames(data)[dim(data)[2]]<-"stress_mean"
+
+data[which(data$years>1947),dim(data)[2]+1]<-stress_sd
+colnames(data)[dim(data)[2]]<-"stress_sd"
+
 data[,dim(data)[2]+1]<-(Ca_RT*10^9)/(C_RT*10^3)
 colnames(data)[dim(data)[2]]<-"rat_Ca_C"
 
