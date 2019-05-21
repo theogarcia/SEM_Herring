@@ -1,5 +1,6 @@
 load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/original_data/uwind_good.RData")
 load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/original_data/vwind_good.RData")
+#uwing_good and v_wingood are yet in west-east and south north direction
 library(SDMTools)
 
 
@@ -63,26 +64,53 @@ time<-c(dimnames(uwind_good)[[3]])
 wind<-NULL
 Stress_mean<-NULL
 Stress_sd<-NULL
-for(i in 1:5){
-          uwind<-c(uwind_good[,,i])*-1
-          vwind<-c(vwind_good[,,i])*-1
+for(i in 1:4){
+          uwind<-c(uwind_good[,,i])
+          vwind<-c(vwind_good[,,i])
           d<-cbind(coor,time[i],uwind,vwind)
           wind<-merge(x=d,y=inside, by=c("x","y"))
           wind[,6]<-apply(wind[,4:5],MARGIN=1,FUN=calcul_projection)
           colnames(wind)[6]<-c("Stress")
           Stress_mean[i]<-mean(wind$Stress)
           Stress_sd[i]<-sd(wind$Stress)
-          title<-paste0("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/original_data/wind_at_time/wind",i,".RData")
-          print(title)
-          save(wind,file=title)
+          print(i)
+          
 }
 
 date<-time[1:length(Stress_mean)]
 Geo_stress<-cbind(Stress_mean,Stress_sd,date)
+Geo_stress<-as.data.frame(Geo_stress)
+Geo_stress[,3]<-as.Date(Geo_stress$date,"%Y_%m_%d_%H")
+Geo_stress[,4]<-format(Geo_stress$date,"%m")
+colnames(Geo_stress)[4]<-"month"
+Geo_stress[,5]<-format(Geo_stress$date,"%Y")
+colnames(Geo_stress)[5]<-"year"
+Geo_stress$Stress_mean<-as.numeric(as.character(Geo_stress$Stress_mean))
+Geo_stress$Stress_sd<-as.numeric(as.character(Geo_stress$Stress_sd))
 
+
+mean_year<-tapply(Geo_stress$Stress_mean, Geo_stress$year, FUN = mean)
+sd_year<-tapply(Geo_stress$Stress_mean, Geo_stress$year, FUN = sd)
+
+mean_month<-tapply(Geo_stress$Stress_mean, Geo_stress$month, FUN = mean)
+sd_month<-tapply(Geo_stress$Stress_mean, Geo_stress$month, FUN = sd)
+
+ACWstress<-list(mean_year,sd_year,mean_month,sd_month)
+names(ACWstress)<-c("mean_year","sd_year","mean_month","sd_month")
+save(ACWstress,file="C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/ACWstress.RData")
 
 ########## Data visualization for March 1st of 1948 #####
 
+wind<-NULL
+for(i in 1:4){
+  uwind<-c(uwind_good[,,i])
+  vwind<-c(vwind_good[,,i])
+  d<-cbind(coor,time[i],uwind,vwind)
+  wind<-merge(x=d,y=inside, by=c("x","y"))
+  title<-paste0("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/original_data/wind_at_time/wind",i,".RData")
+  print(title)
+  save(wind,file=title)
+}
 wind1<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/original_data/wind_at_time/wind1.RData"))
 wind2<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/original_data/wind_at_time/wind2.RData"))
 wind3<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/original_data/wind_at_time/wind3.RData"))
@@ -107,16 +135,16 @@ fond_de_carte<- ggplot(data = world) +
   geom_polygon(data=poly_cont,aes(x=x,y=y), colour="black", fill=NA)
 p1<-fond_de_carte+geom_segment(data=wind1, mapping= aes(x=x, y=y, xend=x+uwind*scaler, yend=y+vwind*scaler), arrow=arrow(type="closed",length=unit(0.09,"cm")),  color="blue")+
   annotate("text", x = 11, y = 62,
-           size=3, label = paste("Stress mean =",round(Stress_mean[1],2),"\n","Stress sd =",round(Stress_sd[1],2)))
+           size=3, label = paste("Stress mean =",round(Geo_stress[1,1],2),"\n","Stress sd =",round(Geo_stress[1,2],2)))
 p2<-fond_de_carte+geom_segment(data=wind2, mapping= aes(x=x, y=y, xend=x+uwind*scaler, yend=y+vwind*scaler), arrow=arrow(type="closed",length=unit(0.09,"cm")),  color="blue")+
   annotate("text", x = 11, y = 62,
-           size=3, label = paste("Stress mean =",round(Stress_mean[2],2),"\n","Stress sd =",round(Stress_sd[2],2)))
+           size=3, label = paste("Stress mean =",round(Geo_stress[2,1],2),"\n","Stress sd =",round(Geo_stress[2,2],2)))
 p3<-fond_de_carte+geom_segment(data=wind3, mapping= aes(x=x, y=y, xend=x+uwind*scaler, yend=y+vwind*scaler), arrow=arrow(type="closed",length=unit(0.09,"cm")),  color="blue")+
   annotate("text", x = 11, y = 62,
-           size=3, label = paste("Stress mean =",round(Stress_mean[3],2),"\n","Stress sd =",round(Stress_sd[3],2)))
+           size=3, label = paste("Stress mean =",round(Geo_stress[3,1],2),"\n","Stress sd =",round(Geo_stress[3,2],2)))
 p4<-fond_de_carte+geom_segment(data=wind4, mapping= aes(x=x, y=y, xend=x+uwind*scaler, yend=y+vwind*scaler), arrow=arrow(type="closed",length=unit(0.09,"cm")),  color="blue")+
   annotate("text", x = 11, y = 62,
-           size=3, label = paste("Stress mean =",round(Stress_mean[4],2),"\n","Stress sd =",round(Stress_sd[4],2)))
+           size=3, label = paste("Stress mean =",round(Geo_stress[4,1],2),"\n","Stress sd =",round(Geo_stress[4,2],2)))
 
 
 grid.arrange(p1,p2,p3,p4)
