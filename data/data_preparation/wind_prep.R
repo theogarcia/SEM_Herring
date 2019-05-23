@@ -5,7 +5,7 @@ library(SDMTools)
 
 
 
-angle<-pi/4
+angle<-0.46
 calcul_projection<-function(Z){
   
   if(Z[2]>0 & Z[1]>0){#2positifs
@@ -51,7 +51,7 @@ ypos<-seq(70,58,by=-0.5)
 x<-rep(xpos,each=length(ypos))
 y<-rep(ypos,times=length(xpos))
 surface<-data.frame(x,y)
-poly_cont<-data.frame(c(5,10,14.5,11.5,3.5),c(62,64,67.5,68,62))
+poly_cont<-data.frame(c(9.5,15,14,8.5),c(64,68,68,64))#c(5,9.5,8.5,4),c(62,63.8,63.8,62))#c(9.5,14.9,14,8.5),c(63.8,67.8,67.8,63.8))#c(5,10,14.5,11.5,3.5),c(62,64,67.5,68,62)
 colnames(poly_cont)<-c("x","y")
 data<-pnt.in.poly(surface,poly_cont)
 inside<-subset(data,data$pip==1)
@@ -64,7 +64,7 @@ time<-c(dimnames(uwind_good)[[3]])
 wind<-NULL
 Stress_mean<-NULL
 Stress_sd<-NULL
-for(i in 1:4){
+for(i in 1:length(time)){
           uwind<-c(uwind_good[,,i])
           vwind<-c(vwind_good[,,i])
           d<-cbind(coor,time[i],uwind,vwind)
@@ -87,6 +87,7 @@ Geo_stress[,5]<-format(Geo_stress$date,"%Y")
 colnames(Geo_stress)[5]<-"year"
 Geo_stress$Stress_mean<-as.numeric(as.character(Geo_stress$Stress_mean))
 Geo_stress$Stress_sd<-as.numeric(as.character(Geo_stress$Stress_sd))
+save(Geo_stress,file="C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/Geo_stress.RData")
 
 
 mean_year<-tapply(Geo_stress$Stress_mean, Geo_stress$year, FUN = mean)
@@ -98,6 +99,13 @@ sd_month<-tapply(Geo_stress$Stress_mean, Geo_stress$month, FUN = sd)
 ACWstress<-list(mean_year,sd_year,mean_month,sd_month)
 names(ACWstress)<-c("mean_year","sd_year","mean_month","sd_month")
 save(ACWstress,file="C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/ACWstress.RData")
+
+par(mfrow=c(2,1))
+plot(ACWstress$mean_month~c(4:8), type="b", xlab="Month", ylab="ACWstress mean", pch=4,col="red",ylim=c(-0.1,3))
+plot(ACWstress$sd_month~c(4:8), type="b", xlab="Month", ylab="ACWstress sd ", pch=4,col="red")
+plot(ACWstress$mean_year~c(1948:2018), type="l", xlab="Month", ylab="ACWstress mean", pch=4,col="red")
+plot(ACWstress$sd_year~c(1948:2018), type="l", xlab="Month", ylab="ACWstress sd ", pch=4,col="red")
+
 
 ########## Data visualization for March 1st of 1948 #####
 
