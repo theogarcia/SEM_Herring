@@ -5,7 +5,7 @@ library(SDMTools)
 
 
 
-angle<-0.46
+angle<-1.0472 #Angle corrected
 calcul_projection<-function(Z){
   
   if(Z[2]>0 & Z[1]>0){#2positifs
@@ -101,7 +101,7 @@ names(ACWstress)<-c("mean_year","sd_year","mean_month","sd_month")
 save(ACWstress,file="C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/ACWstress.RData")
 
 par(mfrow=c(2,1))
-plot(ACWstress$mean_month~c(4:8), type="b", xlab="Month", ylab="ACWstress mean", pch=4,col="red",ylim=c(-0.1,3))
+plot(ACWstress$mean_month~c(4:8), type="b", xlab="Month", ylab="ACWstress mean", pch=4,col="red")
 plot(ACWstress$sd_month~c(4:8), type="b", xlab="Month", ylab="ACWstress sd ", pch=4,col="red")
 plot(ACWstress$mean_year~c(1948:2018), type="l", xlab="Month", ylab="ACWstress mean", pch=4,col="red")
 plot(ACWstress$sd_year~c(1948:2018), type="l", xlab="Month", ylab="ACWstress sd ", pch=4,col="red")
@@ -139,20 +139,20 @@ scaler <- 0.05
 
 fond_de_carte<- ggplot(data = world) +
   geom_sf() +
-  coord_sf(xlim = c(3, 15), ylim = c(61, 69), expand = FALSE)+
+  coord_sf(xlim = c(5, 19), ylim = c(62, 70), expand = FALSE)+
   geom_polygon(data=poly_cont,aes(x=x,y=y), colour="black", fill=NA)
 p1<-fond_de_carte+geom_segment(data=wind1, mapping= aes(x=x, y=y, xend=x+uwind*scaler, yend=y+vwind*scaler), arrow=arrow(type="closed",length=unit(0.09,"cm")),  color="blue")+
-  annotate("text", x = 11, y = 62,
-           size=3, label = paste("Stress mean =",round(Geo_stress[1,1],2),"\n","Stress sd =",round(Geo_stress[1,2],2)))
+  annotate("text", x = 16, y = 65,
+           size=5, label = paste("Stress mean =",round(Geo_stress[1,1],2),"\n","Stress sd =",round(Geo_stress[1,2],2)))
 p2<-fond_de_carte+geom_segment(data=wind2, mapping= aes(x=x, y=y, xend=x+uwind*scaler, yend=y+vwind*scaler), arrow=arrow(type="closed",length=unit(0.09,"cm")),  color="blue")+
-  annotate("text", x = 11, y = 62,
-           size=3, label = paste("Stress mean =",round(Geo_stress[2,1],2),"\n","Stress sd =",round(Geo_stress[2,2],2)))
+  annotate("text", x = 16, y = 65,
+           size=5, label = paste("Stress mean =",round(Geo_stress[2,1],2),"\n","Stress sd =",round(Geo_stress[2,2],2)))
 p3<-fond_de_carte+geom_segment(data=wind3, mapping= aes(x=x, y=y, xend=x+uwind*scaler, yend=y+vwind*scaler), arrow=arrow(type="closed",length=unit(0.09,"cm")),  color="blue")+
-  annotate("text", x = 11, y = 62,
-           size=3, label = paste("Stress mean =",round(Geo_stress[3,1],2),"\n","Stress sd =",round(Geo_stress[3,2],2)))
+  annotate("text", x = 16, y = 65,
+           size=5, label = paste("Stress mean =",round(Geo_stress[3,1],2),"\n","Stress sd =",round(Geo_stress[3,2],2)))
 p4<-fond_de_carte+geom_segment(data=wind4, mapping= aes(x=x, y=y, xend=x+uwind*scaler, yend=y+vwind*scaler), arrow=arrow(type="closed",length=unit(0.09,"cm")),  color="blue")+
-  annotate("text", x = 11, y = 62,
-           size=3, label = paste("Stress mean =",round(Geo_stress[4,1],2),"\n","Stress sd =",round(Geo_stress[4,2],2)))
+  annotate("text", x = 16, y = 65,
+           size=5, label = paste("Stress mean =",round(Geo_stress[4,1],2),"\n","Stress sd =",round(Geo_stress[4,2],2)))
 
 
 grid.arrange(p1,p2,p3,p4)
