@@ -5,22 +5,26 @@ library(SDMTools)
 
 
 
-angle<-1.0472 #Angle corrected
-calcul_projection<-function(Z){
+angle<-1.0472+(pi/2) #Angle corrected
+calcul_projection_b<-function(Z){
   
   if(Z[2]>0 & Z[1]>0){#2positifs
     
     beta<-atan2(Z[2],Z[1])
-    alpha<-beta-angle
-    pz<-cos(alpha)*sqrt((Z[1]^2)+(Z[2]^2))
+      if(beta>angle){
+            alpha<-beta-angle
     
+          }else{
+            alpha<-angle-beta
+                              }
+    pz<-cos(alpha)#*sqrt((Z[1]^2)+(Z[2]^2))
     
   } else if(Z[2]<0 & Z[1]>0){#yneg,xpos
     
     beta_prim2<-atan2(abs(Z[2]),abs(Z[1]))
     beta<-2*pi-beta_prim2
     alpha<-beta-angle
-    pz<-cos(alpha)*sqrt((Z[1]^2)+(Z[2]^2))
+    pz<-cos(alpha)#*sqrt((Z[1]^2)+(Z[2]^2))
     
     
     
@@ -30,16 +34,16 @@ calcul_projection<-function(Z){
     beta_prim3<-atan2(abs(Z[2]),abs(Z[1]))
     beta<-pi-beta_prim3
     alpha<-beta-angle
-    pz<-cos(alpha)*sqrt((Z[1]^2)+(Z[2]^2))
+    pz<-cos(alpha)#*sqrt((Z[1]^2)+(Z[2]^2))
     
     
     
   }else { #xpos,y
     
-    beta<-atan2(abs(Z[2]),abs(Z[1]))+pi
-    
+    betaprim<-atan2(abs(Z[2]),abs(Z[1]))
+    beta<-betaprim+pi
     alpha<-beta-angle
-    pz<-cos(alpha)*sqrt((Z[1]^2)+(Z[2]^2))
+    pz<-cos(alpha)#*sqrt((Z[1]^2)+(Z[2]^2))
     
     
   }
@@ -61,20 +65,34 @@ colnames(coor)<-c("y","x")
 
 time<-c(dimnames(uwind_good)[[3]])
 
+proj_mean<-NULL
+proj_sd<-NULL
 wind<-NULL
 Stress_mean<-NULL
 Stress_sd<-NULL
-for(i in 1:length(time)){
-          uwind<-c(uwind_good[,,i])
-          vwind<-c(vwind_good[,,i])
-          d<-cbind(coor,time[i],uwind,vwind)
-          wind<-merge(x=d,y=inside, by=c("x","y"))
-          wind[,6]<-apply(wind[,4:5],MARGIN=1,FUN=calcul_projection)
-          colnames(wind)[6]<-c("Stress")
-          Stress_mean[i]<-mean(wind$Stress)
-          Stress_sd[i]<-sd(wind$Stress)
-          print(i)
+#for(i in 1:length(time)){
+ #         uwind<-c(uwind_good[,,i])
+  #        vwind<-c(vwind_good[,,i])
+   #       d<-cbind(coor,time[i],uwind,vwind)
+    #      wind<-merge(x=d,y=inside, by=c("x","y"))
+     #     wind[,6]<-apply(wind[,4:5],MARGIN=1,FUN=calcul_projection)
+      #    colnames(wind)[6]<-c("Stress")
+       #   Stress_mean[i]<-mean(wind$Stress)
+        #  Stress_sd[i]<-sd(wind$Stress)
+         # print(i)
           
+#}
+for(i in 1:length(time)){
+  uwind<-c(uwind_good[,,i])
+  vwind<-c(vwind_good[,,i])
+  d<-cbind(coor,time[i],uwind,vwind)
+  wind<-merge(x=d,y=inside, by=c("x","y"))
+  wind[,6]<-apply(wind[,4:5],MARGIN=1,FUN=calcul_projection_b)
+  colnames(wind)[6]<-c("Stress")
+  proj_mean[i]<-mean(wind$Stress)
+  proj_sd[i]<-sd(wind$Stress)
+  print(i)
+  
 }
 
 date<-time[1:length(Stress_mean)]
@@ -88,6 +106,7 @@ colnames(Geo_stress)[5]<-"year"
 Geo_stress$Stress_mean<-as.numeric(as.character(Geo_stress$Stress_mean))
 Geo_stress$Stress_sd<-as.numeric(as.character(Geo_stress$Stress_sd))
 save(Geo_stress,file="C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/Geo_stress.RData")
+load(file="C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/Geo_stress.RData")
 
 
 mean_year<-tapply(Geo_stress$Stress_mean, Geo_stress$year, FUN = mean)
@@ -103,8 +122,8 @@ save(ACWstress,file="C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/d
 par(mfrow=c(2,1))
 plot(ACWstress$mean_month~c(4:8), type="b", xlab="Month", ylab="ACWstress mean", pch=4,col="red")
 plot(ACWstress$sd_month~c(4:8), type="b", xlab="Month", ylab="ACWstress sd ", pch=4,col="red")
-plot(ACWstress$mean_year~c(1948:2018), type="l", xlab="Month", ylab="ACWstress mean", pch=4,col="red")
-plot(ACWstress$sd_year~c(1948:2018), type="l", xlab="Month", ylab="ACWstress sd ", pch=4,col="red")
+plot(ACWstress$mean_year~c(1948:2018), type="l", xlab="Year", ylab="ACWstress mean", pch=4,col="red")
+plot(ACWstress$sd_year~c(1948:2018), type="l", xlab="Year", ylab="ACWstress sd ", pch=4,col="red")
 
 
 ########## Data visualization for March 1st of 1948 #####
