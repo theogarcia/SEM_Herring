@@ -28,9 +28,8 @@ WGIDE<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/
 ###### Compare TS ACW #####
 
 par(mar = c(5,5,2,5))
-plot(ACW$mean_year~c(1948:2018), type="l",xlab="Year", ylab="ACW",ylim=c(-0.09,0.2) )
-par(new = T)
-plot(ACW_bis$ACW_Men~c(1948:2018), type="l",col="red",ylim = new_lim(ACW_bis$ACW_Men, 2),xlab=NA, ylab=NA, axes=F)
+plot(ACWstress2$mean_year~c(1948:2018), type="l",xlab="Year", ylab="ACW")
+lines(ACW_bis$ACW_Men~c(1948:2018), col="red")
 axis(side = 4, col="red",col.axis="red")
 mtext(side = 4, line = 3, 'ACW oystein', col="red")
 
