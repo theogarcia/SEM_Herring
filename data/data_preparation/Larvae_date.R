@@ -64,5 +64,7 @@ cbind(df[df$hatch_date %in% d,4],df[df$hatch_date %in% d2,4])
 library(lubridate)
 year<-c(1987:2016)
 Mean_Hatch_Date<-data.frame(yday(d),year )
+names(Mean_Hatch_Date)<-c("mean_hatch","year")
+save(Mean_Hatch_Date,file="C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/Mean_Hatch_Date.RData")
 
 
