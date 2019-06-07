@@ -1,3 +1,5 @@
+library(dplyr)
+###### Download data ####
 library(RNCEP)
 
 uflx<-NCEP.gather.gaussian("uflx.sfc",c(4,8),c(1948,2018),c(64,68),c(8.5,15))
@@ -152,8 +154,67 @@ ACWstress<-list(mean_year,sd_year,mean_month,sd_month)
 names(ACWstress)<-c("mean_year","sd_year","mean_month","sd_month")
 save(ACWstress,file="C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/ACWstress.RData")
 
+
+######################################################################### 
+######################### Data Visualization ############################
+#########################################################################
+Sal<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/original_data/Salinity.RData"))
+AFWG<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/original_data/AFWG.RData"))
+Toresen<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/original_data/TORESEN.RData"))
+WGIDE<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/original_data/WGIDE.RData"))
+#################
+library(quantreg)
+#### Align zero on plot #####
+new_lim <- function(a, type = 1) {
+  newdata_ratio <-  NULL
+  i <- type * 2 - 1
+  old_lim <- par("usr")[i:(i+1)] + c(diff(par("usr")[i:(i+1)]) * 0.04 / 1.08, 
+                                     diff(par("usr")[i:(i+1)]) * -0.04 / 1.08)
+  old_ratio <- old_lim[1] / old_lim[2]
+  newdata_ratio <- if (max(a) <= 0) -1.0e+6 else min(a) / max(a)
+  if (old_ratio >= newdata_ratio ) {
+    new_min <- min(a)
+    new_max <- min(a) / old_ratio
+  } else {
+    new_min <- max(a) * old_ratio
+    new_max <- max(a)
+  }
+  c(new_min, new_max)
+}
+
+###########TS calculated
 par(mfrow=c(2,1))
 plot(ACWstress$mean_month~c(4:8), type="b", xlab="Month", ylab="ACWstress mean", pch=4,col="red")
 plot(ACWstress$sd_month~c(4:8), type="b", xlab="Month", ylab="ACWstress sd ", pch=4,col="red")
 plot(ACWstress$mean_year~c(1948:2018), type="l", xlab="Year", ylab="ACWstress mean", pch=4,col="red")
 plot(ACWstress$sd_year~c(1948:2018), type="l", xlab="Year", ylab="ACWstress sd ", pch=4,col="red")
+
+########### ACW and salinity
+
+windows()
+par(mfrow=c(1,2))
+plot(ACWstress$mean_year~Sal$Sal_I2[-c(1:12)],ylab="ACWstress",xlab="Sal_I2")
+text(x=-2, y=-0.01,labels=paste("cor=",round(cor(ACWstress$mean_year,Sal$Sal_I2[-c(1:12)]),3)))
+plot(ACWstress$mean_year~Sal$Sal_I1[-c(1:12)],ylab="ACWstress",xlab="Sal_I1")
+text(x=-2, y=-0.01,labels=paste("cor=",round(cor(ACWstress$mean_year,Sal$Sal_I1[-c(1:12)]),3)))
+
+#### H_0~Sal & ACW ####
+windows()
+par(mfrow=c(2,2))
+plot(AFWG$H_0[-c(1:73,112)]~Sal$Sal_I2[-c(1:44,83)],ylab="H_0",xlab="Sal_I2")
+abline(rq(AFWG$H_0[-c(1:73,112)]~Sal$Sal_I2[-c(1:44,83)],tau=0.95), col="red")
+abline(rq(AFWG$H_0[-c(1:73,112)]~Sal$Sal_I2[-c(1:44,83)],tau=0.9), col="orange")
+plot(AFWG$H_0[-c(1:73,112)]~Sal$Sal_I1[-c(1:44,83)],ylab="H_0",xlab="Sal_I1")
+abline(rq(AFWG$H_0[-c(1:73,112)]~Sal$Sal_I1[-c(1:44,83)],tau=0.95), col="red")
+abline(rq(AFWG$H_0[-c(1:73,112)]~Sal$Sal_I1[-c(1:44,83)],tau=0.9), col="orange")
+plot(AFWG$H_0[-c(1:73,112)]~ACWstress$mean_year[-c(1:32,71)],ylab="H_0",xlab="ACW")
+abline(rq(AFWG$H_0[-c(1:73,112)]~ACWstress$mean_year[-c(1:32,71)],tau=0.95), col="red")
+abline(rq(AFWG$H_0[-c(1:73,112)]~ACWstress$mean_year[-c(1:32,71)],tau=0.9), col="orange")
+
+#### H_VPA_R0 ~ Sal & ACW ####
+windows()
+par(mfrow=c(2,2))
+plot(Toresen$H_VPA_R0[-c(1:29,92)]~Sal$Sal_I2[-c(63:83)],ylab="H0_VPA",xlab="Sal_I2")
+plot(Toresen$H_VPA_R0[-c(1:29,92)]~Sal$Sal_I1[-c(63:83)],ylab="H0_VPA",xlab="Sal_I1")
+plot(Toresen$H_VPA_R0[-c(1:41,92)]~ACWstress$mean_year[-c(51:71)],ylab="H0_VPA",xlab="ACW_mean")
+
