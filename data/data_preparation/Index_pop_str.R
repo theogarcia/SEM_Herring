@@ -1,16 +1,15 @@
 ########################################################################################################
 #####################Index age structure calcul (mean spawners)#########################################
 ########################################################################################################
-setwd("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring")
-data <- read.csv("data_1.csv", header=T, sep=";",dec=".")
+WGIDE<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/original_data/WGIDE.RData"))
 
 colnames(data)
 
 Age<-matrix(rep(2:12,31),ncol=11,byrow=T) #Age class
-numb<-data[-c(1:81),5:15] #Abundance in each year class
-weight<-cbind(data[-c(1:81),30:39],apply(data[-c(1:81),40:43],1,mean)) #Weight@age
+numb<-WGIDE[-c(1:81),2:12] #Abundance in each year class
+weight<-cbind(WGIDE[-c(1:81),24:33],apply(data[-c(1:81),34:37],1,mean))#Weight@age
 colnames(weight)[11]<-"wg_H12"
-mat<-cbind(data[-c(1:81),20:27],rep(1,31),rep(1,31),rep(1,31)) #%spawner@age
+mat<-cbind(WGIDE[-c(1:81),14:21],rep(1,31),rep(1,31),rep(1,31)) #%spawner@age
 colnames(mat)[9:11]<-c("prop_H10","prop_H11","prop_H12")
 
 library(abind)
@@ -20,7 +19,7 @@ num<-apply(apply(mat_3D_num,MARGIN=c(1,2),prod),MARGIN=1,sum)
 den<-apply(apply(mat_3D_den,MARGIN=c(1,2),prod),MARGIN=1,sum)
 Index<-num/den
 Index<-cbind(data[-c(1:81),1],Index)
-#save(Index, file = "Index_pop_str.Rdata")
+#save(Index, file = "C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/Index_pop_str.Rdata")
 
 ########################################################################################################
 #####################Index age structure calcul (mean new spawners)##################################
@@ -56,4 +55,4 @@ num2<-apply(apply(newmat_3D_num,MARGIN=c(1,2),prod),MARGIN=1,sum)
 den2<-apply(apply(newmat_3D_den,MARGIN=c(1,2),prod),MARGIN=1,sum)
 Index_new<-num2/den2
 Index_new<-cbind(data[-c(1:81),1],Index_new)
-#save(Index_new, file = "Index_new_str.Rdata")
+#save(Index_new, file = "C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/Index_new_str.Rdata")
