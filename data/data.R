@@ -11,6 +11,7 @@ ACWstress<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/d
 Index_new_str<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/Index_new_str.RData"))
 Index_pop_str<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/Index_pop_str.RData"))
 Mean_Hatch_Date<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/Mean_Hatch_Date.RData"))
+Cod_cons<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/original_data/Cod_cons.RData"))
 
 ######################## Select Ts in datasets ###########################
 
@@ -24,6 +25,7 @@ Cap_cod_rat<-(AFWG$SSB_Ca*10^9)/(AFWG$C_RT*10^3)
 afwg<-data.frame(AFWG[,c(1,24)],Cod,Cap_cod_rat)
 
 colnames(Salinity)[1]<-c("years")
+
 sjomil<-data.frame(SJOMIL[,c(1,3,4)])
 
 acw_2<-data.frame(ACWstress$mean_year,ACWstress$sd_year)
@@ -37,8 +39,11 @@ colnames(Index_pop_str)<-c("years","Age_index1")
 
 colnames(Mean_Hatch_Date)[2]<-"years"
 
+colnames(Cod_cons)<-c("years","Cc_H")
+
+
 ######################### Merge into an unique dataset ##################################
 
-data<-Reduce(function(x,y) merge(x = x, y = y, by = "years",all=T), list(wgide, wginor, afwg,sjomil,acw,Index_new_str,Index_pop_str,Mean_Hatch_Date))
+data<-Reduce(function(x,y) merge(x = x, y = y, by = "years",all=T), list(wgide, wginor, afwg,sjomil,acw,Index_new_str,Index_pop_str,Salinity,Mean_Hatch_Date,Cod_cons))
 save(data, file = "C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data.Rdata")
 
