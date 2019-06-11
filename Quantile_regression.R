@@ -1,10 +1,10 @@
-library(ggplot2)
-library(mgcv)
-library(qgam) #Quant reg
+library(ggplot2) #plot
+library(mgcv) #Quantgam
+library(qgam) #Quantgam
 library(visreg) #package gam
 library(quantreg) #Quant reg
 library(Hmisc) #Lag function
-library(dplyr)
+library(dplyr) 
 library(mgcViz) #QAGM check
 ###################################### Load data #######################################################
 
@@ -41,6 +41,7 @@ pred <- predict(model1, newdata = data, se=TRUE)
 
 fit1 <- qgamV(H_R2 ~ s(Cc_H,k=3), data=data, qu = 0.9) #
 check1D(fit1, "Cc_H") + l_gridQCheck1D(qu = 0.9)       #Check residuals......
+check.qgam(model1)
 
 plot(H_R2~Cc_H,data=data)
 points(data$Cc_H,pred$fit,col="red",pch=16,cex=1.1)
@@ -213,45 +214,45 @@ points(data$SSB_H, pred18$fit - 2*pred18$se.fit,pch=16,cex=1.1, col = "blue")
 windows()
 par(mfrow=c(2,2))
 
-plot(H_R2~Cc_H,data=data, xlab="Consumption by Cod", ylab="Herring recruits at age 2")
+plot(H_R2~Cc_H,data=data, xlab="Consumption by Cod", ylab="Herring recruits at age 2", ylim=c(0,max(pred$fit + 2*pred$se.fit, na.rm=T)))
 points(data$Cc_H,pred$fit,col="red",pch=16,cex=1.1)
 points(data$Cc_H, pred$fit + 2*pred$se.fit,pch=16,cex=1.1,col = "blue")
 points(data$Cc_H, pred$fit - 2*pred$se.fit,pch=16,cex=1.1, col = "blue")
 
-plot(H_R2~Puff,data=data, xlab="Puffin abundance", ylab="Herring recruits at age 2")
+plot(H_R2~Puff,data=data, xlab="Puffin abundance", ylab="Herring recruits at age 2", ylim=c(0,max(pred4$fit + 2*pred4$se.fit, na.rm=T)))
 points(data$Puff,pred4$fit,col="red",pch=16,cex=1.1)
 points(data$Puff, pred4$fit + 2*pred4$se.fit,pch=16,cex=1.1,col = "blue")
 points(data$Puff, pred4$fit - 2*pred4$se.fit,pch=16,cex=1.1, col = "blue")
 
-plot(H_R2~H_0, data=data, xlab="Juveniles abundance (age 0)", ylab="Herring recruits at age 2")
+plot(H_R2~H_0, data=data, xlab="Juveniles abundance (age 0)", ylab="Herring recruits at age 2", ylim=c(0,max(pred5$fit + 2*pred5$se.fit, na.rm=T)))
 points(data$H_0, pred5$fit,col="red",pch=16,cex=1.1)
 points(data$H_0, pred5$fit + 2*pred5$se.fit,pch=16,cex=1.1,col = "blue")
 points(data$H_0, pred5$fit - 2*pred5$se.fit,pch=16,cex=1.1, col = "blue")
 
-####### H_0
+####### H_0 ########
 windows()
 par(mfrow=c(3,2))
-plot(H_0~Sal_I2, data=data, xlab="Salinity anomalies", ylab="Juveniles abundance (age 0)")
+plot(H_0~Sal_I2, data=data, xlab="Salinity anomalies", ylab="Juveniles abundance (age 0)", ylim=c(0,max(pred6$fit + 2*pred6$se.fit, na.rm=T)))
 points(data$Sal_I2, pred6$fit,col="red",pch=16,cex=1.1)
 points(data$Sal_I2, pred6$fit + 2*pred6$se.fit,pch=16,cex=1.1,col = "blue")
 points(data$Sal_I2, pred6$fit - 2*pred6$se.fit,pch=16,cex=1.1, col = "blue")
 
-plot(H_0~Mack, data=data, xlab="Mackerel abundance", ylab="Juveniles abundance (age 0)")
+plot(H_0~Mack, data=data, xlab="Mackerel abundance", ylab="Juveniles abundance (age 0)", ylim=c(0,max(pred11$fit + 2*pred11$se.fit, na.rm=T)))
 points(data$Mack, pred11$fit,col="red",pch=16,cex=1.1)
 points(data$Mack, pred11$fit + 2*pred11$se.fit,pch=16,cex=1.1,col = "blue")
 points(data$Mack, pred11$fit - 2*pred11$se.fit,pch=16,cex=1.1, col = "blue")
 
-plot(H_0~Cal_fin, data=data, xlab="Calanus finmarchichus abundance", ylab="Juveniles abundance (age 0)")
+plot(H_0~Cal_fin, data=data, xlab="Calanus finmarchichus abundance", ylab="Juveniles abundance (age 0)", ylim=c(0,max(pred13$fit + 2*pred13$se.fit, na.rm=T)))
 points(data$Cal_fin, pred13$fit,col="red",pch=16,cex=1.1)
 points(data$Cal_fin, pred13$fit + 2*pred13$se.fit,pch=16,cex=1.1,col = "blue")
 points(data$Cal_fin, pred13$fit - 2*pred13$se.fit,pch=16,cex=1.1, col = "blue")
 
-plot(H_0~mean_hatch, data=data, xlab="Mean hatching date", ylab="Juveniles abundance (age 0)")
+plot(H_0~mean_hatch, data=data, xlab="Mean hatching date", ylab="Juveniles abundance (age 0)", ylim=c(0,max(pred15$fit + 2*pred15$se.fit, na.rm=T)))
 points(data$mean_hatch, pred15$fit,col="red",pch=16,cex=1.1)
 points(data$mean_hatch, pred15$fit + 2*pred15$se.fit,pch=16,cex=1.1,col = "blue")
 points(data$mean_hatch, pred15$fit - 2*pred15$se.fit,pch=16,cex=1.1, col = "blue")
 
-plot(H_0~SSB_H, data=data, xlab="SSB", ylab="Juveniles abundance (age 0)")
+plot(H_0~SSB_H, data=data, xlab="SSB", ylab="Juveniles abundance (age 0)", ylim=c(0,max(pred18$fit + 2*pred18$se.fit, na.rm=T)))
 points(data$SSB_H, pred18$fit,col="red",pch=16,cex=1.1)
 points(data$SSB_H, pred18$fit + 2*pred18$se.fit,pch=16,cex=1.1,col = "blue")
 points(data$SSB_H, pred18$fit - 2*pred18$se.fit,pch=16,cex=1.1, col = "blue")
