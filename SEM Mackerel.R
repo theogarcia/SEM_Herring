@@ -12,13 +12,13 @@ library(Hmisc)
 library(dplyr)
 library(Qtools)#Goodness of fit quantile regression
 ##### data ####
-data <- read.csv("data_1.csv", header=T, sep=";",dec=".")
-load("stress_mean.RData")
-load("stress_sd.RData")
-data[which(data$years>1947),dim(data)[2]+1]<-stress_mean
-colnames(data)[dim(data)[2]]<-"stress_mean"
-data[which(data$years>1947),dim(data)[2]+1]<-stress_sd
-colnames(data)[dim(data)[2]]<-"stress_sd"
+data <- read.csv("data/data_1.csv", header=T, sep=";",dec=".")
+##load("stress_mean.RData")
+###load("stress_sd.RData")
+#data[which(data$years>1947),dim(data)[2]+1]<-stress_mean
+#colnames(data)[dim(data)[2]]<-"stress_mean"
+#data[which(data$years>1947),dim(data)[2]+1]<-stress_sd
+#colnames(data)[dim(data)[2]]<-"stress_sd"
 attach(data)
 
 #####Quantile regression plots ##########
