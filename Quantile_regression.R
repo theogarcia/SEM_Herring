@@ -26,23 +26,21 @@ data$T_Ssum<-Lag(data$T_Ssum,-2)
 data$Cal_fin<-Lag(data$Cal_fin,-2)
 data$ACW_stress<-Lag(data$ACW_stress,-2)
 data$ACW_stab<-Lag(data$ACW_stab,-2)
-data$ACW_stab<-Lag(data$ACW_stab,-2)
 data$mean_hatch<-Lag(data$mean_hatch,-2)
 data$Sal_I2<-Lag(data$Sal_I2,-2)
 data$Sal_I1<-Lag(data$Sal_I1,-2)
 data$SSB_H<-Lag(data$SSB_H,-2)
 data$Age_index1<-Lag(data$Age_index1,-2)
 data$Age_index2<-Lag(data$Age_index2,-2)
-
+attach(data)
 #################################### Quantile regressions ###############################################
 ######## Cod predation
 dat1<-data.frame(na.omit(cbind(H_R2,Cc_H)))
 model1<-qgam(H_R2~s(Cc_H,k=3),data=dat1,qu=0.9)
 pred <- predict(model1, newdata = dat1, se=TRUE)
 
-fit1 <- qgamV(H_R2 ~ s(Cc_H,k=3), data=data, qu = 0.9) #
-check1D(fit1, "Cc_H") + l_gridQCheck1D(qu = 0.9)       #Check residuals......
 check.qgam(model1)
+cqcheck(obj = model1, v = c("Cc_H"), X = dat1, y = dat1$H_R2) 
 
 plot(H_R2~Cc_H,data=dat1,ylim=c(0,max(pred$fit + 2*pred$se.fit, na.rm=T)))
 points(dat1$Cc_H,pred$fit,col="red",pch=16,cex=1.1)
@@ -58,6 +56,8 @@ points(datcap$Cap_cod_rat,pred2$fit,col="red",pch=16,cex=1.1)
 points(datcap$Cap_cod_rat, pred2$fit + 2*pred2$se.fit,pch=16,cex=1.1,col = "blue")
 points(datcap$Cap_cod_rat, pred2$fit - 2*pred2$se.fit,pch=16,cex=1.1, col = "blue")
 
+plot(Cc_H~Cap_cod_rat,data=datcap)
+points(exp(predict(rq(log(datcap$Cc_H)~log(datcap$Cap_cod_rat),tau=0.9)))~datcap$Cap_cod_rat,col="red")
 
 dat3<-data.frame(na.omit(cbind(Cc_H,Cod)))
 model3<-qgam(Cc_H~s(Cod,k=3),data=dat3,qu=0.9)
@@ -144,7 +144,9 @@ dat11<-data.frame(na.omit(cbind(H_0,Mack)))
 model11<-qgam(H_0~s(Mack,k=3),data=dat11,qu=0.9)
 pred11<- predict(model11, newdata = dat11, se=TRUE)
 
-plot(H_0~Mack, data=dat11,ylim=c(0,max(H_0, na.rm=T)))
+plot(dat11$H_0~dat11$Mack, data=dat11)
+points(exp(predict(rq(log(dat11$H_0)~log(dat11$Mack), tau=0.9)))~dat11$Mack , col="red")
+
 points(dat11$Mack, pred11$fit,col="red",pch=16,cex=1.1)
 points(dat11$Mack, pred11$fit + 2*pred11$se.fit,pch=16,cex=1.1,col = "blue")
 points(dat11$Mack, pred11$fit - 2*pred11$se.fit,pch=16,cex=1.1, col = "blue")
