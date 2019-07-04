@@ -1,16 +1,8 @@
 library(piecewiseSEM)
 data("keeley")
 library(brms)
-
-rich_mod <- bf(rich ~ firesev + cover)
-cover_mod <- bf(cover ~ firesev)
-
-k_fit_brms <- brm(rich_mod +
-                    cover_mod + 
-                    set_rescor(FALSE), 
-                  data=keeley,
-                  cores=4, chains = 2)
-plot(k_fit_brms)
+library(dplyr) 
+library(quantreg)
 
 ##################################################################################
 library(Hmisc) #Lag function
@@ -42,40 +34,75 @@ data$Age_index1<-Lag(data$Age_index1,-2)
 data$Age_index2<-Lag(data$Age_index2,-2)
 attach(data)
 
-#################################### Quantile regressions ###############################################
-herr <- bf(H_R2 ~ H_0 + Cc_H, quantile = 0.9)
-cod <- bf(Cc_H ~ Cap_cod_rat, quantile = 0.9)
+#################################### Bayesian SEM ###############################################
+##########  Linear model and quantile linear model 
 
-herr_fit_brms <- brm(herr +
-                    cod+ 
-                    set_rescor(FALSE), 
-                  data=data,family = asym_laplace(),
-                  cores=4, chains = 2)
+fitmack<-brm(bf(H_0~Mack),data=data)
+
+summary(fitmack)
+plot(fitmack)
+plot(marginal_effects(fitmack), points = TRUE)
+
+fitmack_q<-brm(bf(H_0~Mack, quantile=0.9),data=data, family=asym_laplace)
+
+summary(fitmack_q)
+plot(fitmack_q)
+plot(marginal_effects(fitmack_q), points = TRUE)
+
+##### For non linear model-> modify prior
+prior1 <- prior(normal(-1,1), nlpar = "a") +
+  prior(normal(1,1), nlpar = "b")+
+  prior(normal(10000,100), nlpar = "c")
+
+fit1 <- brm(bf(H_R2 ~ a * Cc_H^2 + b * Cc_H  + c, a + b +c ~ 1, nl = TRUE),
+            data = data, prior = prior1)
+
+summary(fit1)
+plot(fit1)
+plot(marginal_effects(fit1), points = TRUE)
+
+#########FIT QUADRATIC FUNCTION AND QUANTILE QUADRATIC FUNCTION ##############
+# start with just a simple quadratic approach
+# y ~ a * x^2 + b * x  + c
+
+my.equation <-H_R2 ~ a * Cc_H^2 + b * Cc_H  + c
+
+# fit the equation to the data via "non-linear least squares"
+# choose some good starting values for parameter estimation
+nls.fit <- nls(my.equation,
+               data = data,
+               start = list(a = 2, b = 3, c = 1))
+
+# look at the result
+summary(nls.fit)
 
 
-plot(herr_fit_brms)
+# create a dummy range of that we use to predict speed from our fitted model
+predict_range <- data.frame(Cc_H = seq(min(Cc_H, na.rm=T), max(Cc_H,na.rm=T), length = 250))
+
+# calculate for each x-range value the corresponding y-range
+my.line <- within(predict_range, y <- predict(nls.fit, newdata = predict_range))
+
+# add the line to the existing graph
+# This line represents the "mean" fit, no quantile regression involved
+# plot data
+plot(Cc_H,H_R2, xlab="Cod predation", ylab="Herring at age 2")
+lines( y~ Cc_H, data = my.line, col = "red")
 
 
-summary(herr_fit_brms)
-
-plot(marginal_effects(herr_fit_brms), points = TRUE)
-
-
-herr0 <- bf(H_0 ~ Mack + Cal_fin)
-mack <- bf(Mack ~ T_Ssum)
-zoo<-bf(Cal_fin~ T_Ssum)
-
-herr0_fit_brms <- brm(herr0 +
-                       mack+
-                       zoo+
-                       set_rescor(FALSE), 
-                     data=data,
-                     cores=4, chains = 2)
+my.rq <- nlrq(my.equation,
+              data = data,
+              start = list(a = 2, b = 3, c = 20000),
+              tau = .9)
+summary(my.rq)
 
 
-plot(herr0_fit_brms)
 
-
-summary(herr0_fit_brms)
+my.line9 <- within(predict_range, 
+                    y <- predict(my.rq, 
+                                 newdata = predict_range))
+plot(Cc_H,H_R2, xlab="Cod predation", ylab="Herring at age 2")
+lines(y ~ Cc_H, data = my.line, col = "red")
+lines(y ~ Cc_H, data = my.line9, col = "blue")
 
 
