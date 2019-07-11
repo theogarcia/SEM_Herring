@@ -46,7 +46,7 @@ library(reshape2)
 library(ggplot2)
 library(grid)
 library(gridExtra)
-scaler <- 0.9
+scaler <- 1.5
 
 
 fond_de_carte<- ggplot(data = world) +
@@ -54,7 +54,9 @@ fond_de_carte<- ggplot(data = world) +
   coord_sf(xlim = c(5, 19), ylim = c(62, 70), expand = FALSE)+
   scale_x_continuous() +
   scale_y_continuous()+
-  geom_polygon(data=poly_cont,aes(x=x,y=y), colour="black", fill=NA)+xlab(label = "Lon")+ylab(label="Lat")
+  geom_polygon(data=poly_cont,aes(x=x,y=y), colour="black", fill=NA)+
+  xlab(label = "Lon")+
+  ylab(label="Lat")
 
 
 fond_de_carte
@@ -62,16 +64,16 @@ fond_de_carte
 
 p1<-fond_de_carte+geom_segment(data=wind1, mapping= aes(x=x, y=y, xend=x+uwind*scaler, yend=y+vwind*scaler), arrow=arrow(type="closed",length=unit(0.15,"cm")),  color="blue")+
   annotate("text", x = 14, y = 63,
-           size=2, label = paste("Stress mean =",round(Geo_stress[1,1],2),"\n","Stress sd =",round(Geo_stress[1,2],2)))
+           size=2, label = paste("Stress =",round(Geo_stress[1,1],2)))
 p2<-fond_de_carte+geom_segment(data=wind2, mapping= aes(x=x, y=y, xend=x+uwind*scaler, yend=y+vwind*scaler), arrow=arrow(type="closed",length=unit(0.15,"cm")),  color="blue")+
   annotate("text", x = 14, y = 63,
-           size=2, label = paste("Stress mean =",round(Geo_stress[2,1],2),"\n","Stress sd =",round(Geo_stress[2,2],2)))
+           size=2, label = paste("Stress mean =",round(Geo_stress[2,1],2)))
 p3<-fond_de_carte+geom_segment(data=wind3, mapping= aes(x=x, y=y, xend=x+uwind*scaler, yend=y+vwind*scaler), arrow=arrow(type="closed",length=unit(0.15,"cm")),  color="blue")+
   annotate("text", x = 14, y = 63,
-           size=2, label = paste("Stress mean =",round(Geo_stress[3,1],2),"\n","Stress sd =",round(Geo_stress[3,2],2)))
+           size=2, label = paste("Stress mean =",round(Geo_stress[3,1],2)))
 p4<-fond_de_carte+geom_segment(data=wind4, mapping= aes(x=x, y=y, xend=x+uwind*scaler, yend=y+vwind*scaler), arrow=arrow(type="closed",length=unit(0.15,"cm")),  color="blue")+
   annotate("text", x = 14, y = 63,
-           size=2, label = paste("Stress mean =",round(Geo_stress[4,1],2),"\n","Stress sd =",round(Geo_stress[4,2],2)))
+           size=2, label = paste("Stress mean =",round(Geo_stress[4,1],2)))
 
 
 grid.arrange(p1,p2,p3,p4)
