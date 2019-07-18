@@ -34,7 +34,7 @@ data$Sal_I1<-Lag(data$Sal_I1,-2)
 data$SSB_H<-Lag(data$SSB_H,-2)
 data$Age_index1<-Lag(data$Age_index1,-2)
 data$Age_index2<-Lag(data$Age_index2,-2)
-#attach(data)
+attach(data)
 
 #################################### Relationships data #################################
 x<-c("T_Ssum","Cal_fin","SSB_H","Age_index1","mean_hatch","Mack",
@@ -80,7 +80,9 @@ plot_quantile<-function(dat.list,pred.list){
         geom_ribbon(aes(ymax=df_pred$fit + 2*df_pred$se.fit,ymin=df_pred$fit - 2*df_pred$se.fit,x=df[,1]),
                     fill = "slategray3")+
         geom_line(aes(y=df_pred$fit,x=df[,1]),data=df,colour="red",size=1.3)+
-        geom_point(aes(y=df[,2],x=df[,1]),data=df,size=1.7)
+        geom_point(aes(y=df[,2],x=df[,1]),data=df,size=1.7)+
+        theme(axis.title.x = element_text(color = "grey20", size = 15, angle = 0, hjust = .5, vjust = 0, face = "plain"),
+              axis.title.y = element_text(color = "grey20", size = 15, angle = 90, hjust = .5, vjust = .5, face = "plain"))
   
   print(p)
 
@@ -116,3 +118,10 @@ plist[[7]]
 
 #### Cod consumption
 grid.arrange(plist[[10]],plist[[11]],ncol=2)
+
+#### H2 and H0
+
+grid.arrange(plist[[2]],plist[[3]],plist[[5]],
+             plist[[6]],plist[[8]],ggplot()+ theme_void(),plist[[9]],
+             plist[[12]],ncol=3)
+
