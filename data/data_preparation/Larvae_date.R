@@ -16,10 +16,12 @@ hatch_date<-subset_larvae[,8]-ref$delay[i]
 mydata[[i]]<-data.frame(hatch_date,numb_egg)
 }
 
+library(rlist)
 mydf <- list.rbind(mydata)
 
 
 #############
+
 df<-aggregate(mydf$numb_egg, by=list(Category=mydf$hatch_date), FUN=sum)
 colnames(df)<-c("hatch_date","numb_egg")
 
