@@ -32,6 +32,7 @@ acw_2<-data.frame(ACWstress$mean_year,ACWstress$sd_year)
 years <- rownames(acw_2)
 rownames(acw_2) <- NULL
 acw <- cbind(years,acw_2)
+Cod_cons<-Cod_cons[,c(1,4)]
 colnames(acw)[c(2,3)]<-c("ACW_stress","ACW_stab")
 
 colnames(Index_new_str)<-c("years","Age_index2")
