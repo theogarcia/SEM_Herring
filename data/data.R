@@ -11,7 +11,7 @@ ACWstress<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/d
 Index_new_str<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/Index_new_str.RData"))
 Index_pop_str<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/Index_pop_str.RData"))
 Mean_Hatch_Date<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/Mean_Hatch_Date.RData"))
-Cod_cons<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/original_data/Cod_cons.RData"))
+Cod_cons<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/Cod.RData"))
 
 ######################## Select Ts in datasets ###########################
 
@@ -32,7 +32,7 @@ acw_2<-data.frame(ACWstress$mean_year,ACWstress$sd_year)
 years <- rownames(acw_2)
 rownames(acw_2) <- NULL
 acw <- cbind(years,acw_2)
-Cod_cons<-Cod_cons[,c(1,4)]
+#Cod_cons<-Cod_cons[,c(1,4)]
 colnames(acw)[c(2,3)]<-c("ACW_stress","ACW_stab")
 
 colnames(Index_new_str)<-c("years","Age_index2")
@@ -40,7 +40,7 @@ colnames(Index_pop_str)<-c("years","Age_index1")
 
 colnames(Mean_Hatch_Date)[2]<-"years"
 
-colnames(Cod_cons)<-c("years","Cc_H")
+colnames(Cod_cons)[2]<-"Cc_H"
 
 
 ######################### Merge into an unique dataset ##################################
