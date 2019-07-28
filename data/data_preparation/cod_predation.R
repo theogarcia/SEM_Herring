@@ -19,31 +19,36 @@ dat[which((dat$H_R2/dat$H_0)>1),3]<-NA #Enlève aberration H0 (3 years)
 
 dat$Tot<-Lag(dat$Age0,+2)+Lag(dat$Age1,+1)#Pertes pour chaque cohorte(H0+H1) en millions
 
-dat$Ztot<--log(dat$H_R2/dat$H_0) #Mortality rate
+dat$Ztot<--log(dat$H_R2/dat$H_0) #Mortality rate on 2 years
 
 abb.pos2<-c(which((dat$Tot/dat$H_0)>1),abb.pos)
 dat[abb.pos2,6]<-NA #Enlève aberrations
 
 dat$Zcod<-(dat$Tot/dat$H_0)*(dat$Ztot/(1-exp(-dat$Ztot))) #Mortality due to cod precodion
 
+dat$Zcod<-dat$Zcod/2
+dat$Ztot<-dat$Ztot/2
 
 cod<-dat[,c(1,6,7,8)]
 
-save(cod,file="C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/cod.RData")
+#save(cod,file="C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/cod.RData")
 
 ############################### Plot
+par(mfrow=c(2,2))
+plot(dat$Zcod,exp(-(dat$Ztot)), xlab="Zcod",ylab="Survival")
+#abline(rq(exp(-(dat$Ztot))~dat$Zcod, tau=0.9))
 
-plot(dat$Zcod,exp(-(dat$Ztot)))
-abline(rq(exp(-(dat$Ztot))~dat$Zcod, tau=0.9))
+plot(dat$Zcod~dat$Ztot, ylab="Zcod",xlab="Ztot", xlim=c(0,2), ylim=c(0,2))
+abline(0,1, lty=2)
+abline(rq(dat$Zcod~dat$Ztot-1,tau=0.9))
+abline(h=0,lty=2)
+#plot.new()
 
+plot(dat$H_R2~dat$Ztot, xlab="Ztot",ylab="H2")
 
-plot(dat$Zcod,dat$Ztot)
+plot(dat$H_R2~dat$Zcod, xlab="Zcod",ylab="H2")
+#abline(rq(dat$H_R2~dat$Zcod, tau=0.9))
 
+#plot(dat$H_R2~exp(-(dat$Ztot)), xlab="Survival",ylab="H2")
+#abline(rq(dat$H_R2~exp(-(dat$Ztot)), tau=0.9))
 
-plot(dat$H_R2~dat$Ztot)
-plot(dat$H_R2~dat$Zcod)
-abline(rq(dat$H_R2~dat$Zcod, tau=0.9))
-
-
-plot(dat$H_R2~exp(-(dat$Ztot)))
-abline(rq(dat$H_R2~exp(-(dat$Ztot)), tau=0.9))
