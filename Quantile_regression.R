@@ -54,10 +54,12 @@ dat<-NULL
 model<-NULL
 pred<-NULL
 add<-NULL
+sum<-NULL
 output_dat<-list()
 output_model<-list()
 output_pred<-list()
 add_output<-list()
+output_summary<-list()
 
 #Calculations
 for (i in 1:length(index)){
@@ -76,6 +78,7 @@ for (i in 1:length(index)){
   output_dat[[i]] <- dat
   output_model[[i]] <- mod
   output_pred[[i]] <- pred
+  output_summary[[i]] <- sum
   add_output[[i]]<-add
   }
 
@@ -117,7 +120,7 @@ detach(data)
 
 ################# Ricker
 
-model.ricker<-rq(log(data$H_R2/data$SSB_H)~data$SSB_H, tau=0.9)
+model.ricker<-rq(log(data$H_0/data$SSB_H)~data$SSB_H, tau=0.9)
 model.ricker.coef<-model.ricker$coefficients
 
 alpha_up_low<-exp(summary(model.ricker)$coefficients[1,c(2,3)])
@@ -146,9 +149,10 @@ dat.SSB<-na.omit(data.frame(H0=data$H_0,SSB=data$SSB_H))
 p7<-ggplot()+
   xlab("SSB")+
   ylab("H0")+
+  ylim(0,800000)+
   geom_ribbon(aes(ymax=R_up,
                   ymin=R_low,x=SSB),
-              fill = "slategray3")+
+                fill = "slategray3")+
   geom_line(aes(y=R,x=SSB),colour="red",size=1.3)+
   geom_point(aes(y=H0,x=SSB),data=dat.SSB,size=1.7)+
   geom_point(aes(y=H_0,x=SSB_H),data=aber,size=1.7,colour="red")+
@@ -193,7 +197,6 @@ dat.line<-data.frame(line_x,line_y)
 p9<-ggplot()+
   xlab("H0")+
   ylab("H2")+
-  ylim(0,120000)+
   geom_ribbon(aes(ymax=exp(mod.H0.pred$fit+ 2*mod.H0.pred$se.fit),
                   ymin=exp(mod.H0.pred$fit- 2*mod.H0.pred$se.fit),x=dat.H0$H0),
               fill = "slategray3")+
@@ -206,8 +209,8 @@ p9<-ggplot()+
 
 ############## Cod predation
 
-dat.cod<-na.omit(data.frame(H2=data$H_R2,Cod=data$Cod,log_H2=log(data$H_R2),
-                           log_Cod=log(data$Cod)))
+dat.cod<-na.omit(data.frame(H2=data$H_R2,Cod=data$Cc_H,log_H2=log(data$H_R2),
+                           log_Cod=log(data$Cc_H)))
 
 mod.cod<-qgam(log_H2~log_Cod,data=dat.cod,qu=0.9)
 mod.cod.pred<- predict(mod.cod, newdata = dat.cod, se=TRUE)
@@ -223,7 +226,7 @@ p10<-ggplot()+
                   ymin=exp(mod.cod.pred$fit- 2*mod.cod.pred$se.fit),x=dat.cod$Cod),
               fill = "slategray3")+
   geom_line(aes(y=exp(mod.cod.pred$fit),x=dat.cod$Cod),data=dat.cod,colour="red",size=1.3)+
-  geom_point(aes(y=aber$H_R2,x=aber$Cod),data=aber,colour="red",size=1.7)+
+  geom_point(aes(y=aber$H_R2,x=aber$Cc_H),data=aber,colour="red",size=1.7)+
   geom_point(aes(y=dat.cod$H2,x=dat.cod$Cod),data=dat.cod,size=1.7)+
   theme(axis.title.x = element_text(color = "grey20", size = 15, angle = 0, hjust = .5, vjust = 0, face = "plain"),
         axis.title.y = element_text(color = "grey20", size = 15, angle = 90, hjust = .5, vjust = .5, face = "plain"))
@@ -266,6 +269,7 @@ p12<-ggplot()+
 
   
 
+##### Complete list of plots with new plots
 
 plist[[7]]<-print(p7)
 plist[[8]]<-print(p8)
@@ -274,8 +278,46 @@ plist[[10]]<-print(p10)
 plist[[11]]<-print(p11)
 plist[[12]]<-print(p12)
 
-grid.arrange(plist[[1]],plist[[2]],plist[[3]],
-             plist[[4]],plist[[5]],plist[[6]],
-             plist[[7]],plist[[8]],plist[[9]],
-             plist[[10]],plist[[11]],plist[[12]],ncol=3)
+
+######################### Plot visualization #####################
+library(scales)
+#All
+tiff("Plot3.tiff", width = 595, height = 842)
+grid.arrange(plist[[7]]+ylab("H_0"),
+             plist[[8]]+ylab("H_0"),
+             plist[[9]]+ylab("H_R2"),
+             plist[[10]]+ylab("H_R2")+xlab("Cc_H"),
+             plist[[4]],
+             plist[[2]],
+             plist[[3]],
+             plist[[1]],
+             plist[[5]],
+             plist[[6]]+ scale_x_continuous(labels = scientific),
+             ncol=2)
+dev.off()
+#Quantile 0.9
+grid.arrange(plist[[7]]+ylab("H_0"),
+             plist[[8]]+ylab("H_0"),
+             plist[[9]]+ylab("H_R2"),
+             plist[[10]]+ylab("H_R2")+xlab("Cc_H"),
+             ncol=2)
+
+#Quantile 0.5
+grid.arrange(plist[[4]],
+             plist[[2]],
+             plist[[3]],
+             plist[[1]],
+             plist[[5]],
+             plist[[6]],
+             ncol=2)
+             
+
+#Ztot vs Zcod
+plist[[11]] #Annex
+
+#VPA vs Survey
+grid.arrange(plist[[9]]+ylim(0,120000),plist[[12]],ncol=2) #Annex
+
+
+
 
