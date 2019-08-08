@@ -36,7 +36,7 @@ data$SSB_H<-Lag(data$SSB_H,2)
 data$Age_index1<-Lag(data$Age_index1,2)
 data$Age_index2<-Lag(data$Age_index2,2)
 data$Ztot<-data$Ztot/2
-data$ZCod<-data$ZCod/2
+data$Zcod<-data$Zcod/2
 
 aber<-data[which((data$H_R2/data$H_0)>1),]
 data[which((data$H_R2/data$H_0)>1),6]<-NA
@@ -44,8 +44,8 @@ data[which((data$H_R2/data$H_0)>1),6]<-NA
 attach(data)
 
 #################################### Relationships data #################################
-x<-c("Age_index1","mean_hatch","ACW_stress","Sal_I2","Cap_cod_rat","Cod")
-y<-c("mean_hatch","H_0","Sal_I2","H_0","Cc_H","Cc_H")
+x<-c("Age_index1","Age_index2","mean_hatch","ACW_stress","Sal_I2","Cap_cod_rat","Cod")
+y<-c("mean_hatch","mean_hatch","H_0","Sal_I2","H_0","Cc_H","Cc_H")
 index<-c(1:length(x))
 RD<-data.frame(x,y,index)
 
@@ -74,6 +74,7 @@ for (i in 1:length(index)){
   mod<-qgam(X2~X1,data=dat,qu=0.5)
   pred<- predict(mod, newdata = dat, se=TRUE)
   colnames(dat)<-c(X,Y)
+  sum<-summary(mod)
   
   output_dat[[i]] <- dat
   output_model[[i]] <- mod
@@ -159,7 +160,23 @@ p7<-ggplot()+
   theme(axis.title.x = element_text(color = "grey20", size = 15, angle = 0, hjust = .5, vjust = 0, face = "plain"),
         axis.title.y = element_text(color = "grey20", size = 15, angle = 90, hjust = .5, vjust = .5, face = "plain"))
 
+p7_not_lim<-ggplot()+
+  xlab("SSB")+
+  ylab("H0")+
+  geom_ribbon(aes(ymax=R_up,
+                  ymin=R_low,x=SSB),
+              fill = "slategray3")+
+  geom_line(aes(y=R,x=SSB),colour="red",size=1.3)+
+  geom_point(aes(y=H0,x=SSB),data=dat.SSB,size=1.7)+
+  geom_point(aes(y=H_0,x=SSB_H),data=aber,size=1.7,colour="red")+
+  theme(axis.title.x = element_text(color = "grey20", size = 15, angle = 0, hjust = .5, vjust = 0, face = "plain"),
+        axis.title.y = element_text(color = "grey20", size = 15, angle = 90, hjust = .5, vjust = .5, face = "plain"))
 
+
+
+p7_zoom<-p7_not_lim+ coord_cartesian(ylim = c(0, 800000), xlim =c(0,8000))
+
+grid.arrange(p7,p7_not_lim,p7_zoom)
 ############## Mackerel
 
 dat.mak<-na.omit(data.frame(H0=data$H_0,mack=data$Mack,
@@ -271,29 +288,31 @@ p12<-ggplot()+
 
 ##### Complete list of plots with new plots
 
-plist[[7]]<-print(p7)
-plist[[8]]<-print(p8)
-plist[[9]]<-print(p9)
-plist[[10]]<-print(p10)
-plist[[11]]<-print(p11)
-plist[[12]]<-print(p12)
+plist[[length(plist)+1]]<-print(p7)
+plist[[length(plist)+1]]<-print(p8)
+plist[[length(plist)+1]]<-print(p9)
+plist[[length(plist)+1]]<-print(p10)
+plist[[length(plist)+1]]<-print(p11)
+plist[[length(plist)+1]]<-print(p12)
 
 
 ######################### Plot visualization #####################
 library(scales)
 #All
 tiff("Plot3.tiff", width = 595, height = 842)
-grid.arrange(plist[[7]]+ylab("H_0"),
-             plist[[8]]+ylab("H_0"),
-             plist[[9]]+ylab("H_R2"),
-             plist[[10]]+ylab("H_R2")+xlab("Cc_H"),
-             plist[[4]],
-             plist[[2]],
-             plist[[3]],
-             plist[[1]],
-             plist[[5]],
-             plist[[6]]+ scale_x_continuous(labels = scientific),
-             ncol=2)
+grid.arrange(plist[[8]]+ylab("Recruits (Age0)"),
+             plist[[9]]+ylab("Recruits (Age0)")+xlab("Mackerel abundance"),
+             plist[[10]]+ylab("Recruits (Age2)")+xlab("Recruits (Age0)"),
+             plist[[11]]+ylab("Recruits (Age2)")+xlab("Cod predation"),
+             plist[[5]]+ylab("Recruits (Age0)")+xlab("Salinity anomalies"),
+             plist[[3]]+ylab("Recruits (Age0)")+xlab("Hatching date"),
+             plist[[2]]+ylab("Hatching date")+xlab("Recruit spawner (%)")+ylim(70,105),
+             plist[[1]]+ylab("Hatching date")+xlab("Spawners average age")+ylim(70,105),
+             plist[[4]]+ylab("Salinity anomalies")+xlab("ACW stress"),
+             plist[[6]]+ylab("Cod predation")+xlab("Cap:cod ratio"),
+             plist[[7]]+ylab("Cod predation")+xlab("Cod abundance")
+             + scale_x_continuous(labels = scientific),
+             ncol=4)
 dev.off()
 #Quantile 0.9
 grid.arrange(plist[[7]]+ylab("H_0"),
