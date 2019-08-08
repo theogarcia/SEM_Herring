@@ -64,6 +64,10 @@ nb_spawn_at_age<-mat*numb
 spawn<-apply(nb_spawn_at_age,1,mean)
 
 percentage<-nb_first_time*100/spawn
+Index_perc<-cbind(data[-c(1:82),1],percentage[-1])
+
+#save(Index_perc, file = "C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/Index_perc.Rdata")
 
 
-plot(data[82:112,2]~Lag(percentage,2), ylab="H2",xlab="% first recruits")
+
+plot(Lag(data[82:112,17],2)~Lag(percentage,2), xlab="% first recruits")
