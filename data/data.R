@@ -8,7 +8,7 @@ AFWG<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/d
 SJOMIL<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/original_data/SJOMIL.RData"))
 Salinity<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/original_data/Salinity.RData"))
 ACWstress<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/ACWstress.RData"))
-Index_new_str<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/Index_new_str.RData"))
+Index_perc_str<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/Index_perc.RData"))
 Index_pop_str<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/Index_pop_str.RData"))
 Mean_Hatch_Date<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/Mean_Hatch_Date.RData"))
 Cod_cons<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/Cod.RData"))
@@ -35,7 +35,7 @@ acw <- cbind(years,acw_2)
 #Cod_cons<-Cod_cons[,c(1,4)]
 colnames(acw)[c(2,3)]<-c("ACW_stress","ACW_stab")
 
-colnames(Index_new_str)<-c("years","Age_index2")
+colnames(Index_perc_str)<-c("years","Age_index2")
 colnames(Index_pop_str)<-c("years","Age_index1")
 
 colnames(Mean_Hatch_Date)[2]<-"years"
@@ -45,6 +45,6 @@ colnames(Cod_cons)[2]<-"Cc_H"
 
 ######################### Merge into an unique dataset ##################################
 
-data<-Reduce(function(x,y) merge(x = x, y = y, by = "years",all=T), list(wgide, wginor, afwg,sjomil,acw,Index_new_str,Index_pop_str,Salinity,Mean_Hatch_Date,Cod_cons))
+data<-Reduce(function(x,y) merge(x = x, y = y, by = "years",all=T), list(wgide, wginor, afwg,sjomil,acw,Index_perc_str,Index_pop_str,Salinity,Mean_Hatch_Date,Cod_cons))
 save(data, file = "C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data.Rdata")
 
