@@ -2,7 +2,7 @@ library(Hmisc) #Lag function
 library(dplyr) 
 library(piecewiseSEM)
 library(lavaan)
-library(brms)
+
 ###################################### Load data #######################################################
 
 load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data.RData")
@@ -50,60 +50,62 @@ ggplot(small.data, aes(x = Cod_pred, y = H2)) +
   scale_size_discrete(range = c(3,9))+ theme(legend.position = "none") 
 
 plot(log(Cc_H)~log(H_0))
+abline(1,1)
 abline(lm(log(Cc_H)~log(H_0)-1))
 
-plot(log(H_R2)~log(Cc_H), col=H_0_fact,pch=16)
-legend(4,9, legend=levels(H_0_fact),
-       col=unique(H_0_fact),pch=16, cex=0.7)
-abline(lm(log(H_R2)~log(Cc_H)-1))
+plot(log(H_R2)~log(H_0))
+abline(lm(log(H_R2)~log(H_0)))
+abline(lm(log(H_R2)~log(H_0)-1))
+
+
+plot(log(H_R2)~log(Cc_H))
+abline(lm(log(H_R2)~log(Cc_H)))
 
 plot(log(H_R2)~log(H_0))
 abline(lm(log(H_R2)~log(H_0)-1))
 
 #### SEM fit #####
-reg_H2<-lm(H2~H0+Cod_pred, data=small.data)
-reg_pred<-lm(Cod_pred~H0+Cod+CapCod, data=small.data)
+reg_H2<-lm(H2~H0-1+Cod_pred, data=small.data)
+reg_pred<-lm(Cod_pred~H0-1+Cod+CapCod, data=small.data)
 
 
 model_1<-psem(reg_H2,reg_pred)
-summary(model_1, .progressBar = F)
+sum.mod1<-summary(model_1, .progressBar = F)
+sum.mod1$IC
+
+
+reg_pred_2<-lm(Cod_pred~Cod+CapCod, data=small.data)
+
 
 model_2<-psem(reg_H2,
-              reg_pred,
-              CapCod%~~%H2,
-              Cod%~~%H2)
-summary(model_2, .progressBar = F)
-
-model_3<-psem(reg_H2,
-              reg_pred,
-              CapCod%~~%H2)
-summary(model_3, .progressBar = F)
-
-model_4<-psem(reg_H2,
-              reg_pred,
-              Cod%~~%H2)
-summary(model_4, .progressBar = F)
-
-AIC(model_1)
-AIC(model_2)
-AIC(model_3)
-AIC(model_4)
-
-### Now test H_0 -> H2
-reg_H2_bis<-lm(H2~Cod_pred, data=small.data)
-
-model_2_bis<-psem(reg_H2_bis,
-                  reg_pred,
-                  CapCod%~~%H2)
-summary(model_2_bis, .progressBar = F)
-
-AIC(model_2_bis)
+              reg_pred_2)
+sum.mod2<-summary(model_2, .progressBar = F)
+sum.mod2$IC
 
 
+############### Causal graph ############
+library(ggdag)
 
+Barents_DAG <- dagify(H2 ~ H0 + Pred,
+                      Pred ~ H0 + Cod + Cap,
+                      H2~~Cod,
+                      H2~~Cap,
+                      labels = c("H2" = "Recruit\n Age 2", 
+                                    "H0" = "Recruit\n 0-group",
+                                    "Pred" = "Cod\n Predation",
+                                    "Cod" = "Cod\n Abundance",
+                                    "Cap" = "Cap:Cod\n ratio"),
+                         outcome = "H2")
+
+ggdag(Barents_DAG, text = FALSE, node = FALSE)+
+  geom_dag_text(aes(label=label),colour="black",check_overlap = T)+
+  theme_dag_blank()
+
+
+#########################""""
 library(DiagrammeR)
 
-grViz("
+Model1.notcor<-grViz("
 	digraph causal {
 	
 	  # Nodes
@@ -126,3 +128,5 @@ grViz("
 	  # Graph
 	  graph [overlap = true, fontsize = 10]
 	}")
+
+Model1.notcor
