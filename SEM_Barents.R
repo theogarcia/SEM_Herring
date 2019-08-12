@@ -65,8 +65,8 @@ plot(log(H_R2)~log(H_0))
 abline(lm(log(H_R2)~log(H_0)-1))
 
 #### SEM fit #####
-reg_H2<-lm(H2~H0-1+Cod_pred, data=small.data)
-reg_pred<-lm(Cod_pred~H0-1+Cod+CapCod, data=small.data)
+reg_H2<-lm(H2~H0+Cod_pred, data=small.data)
+reg_pred<-lm(Cod_pred~H0+Cod+CapCod, data=small.data)
 
 
 model_1<-psem(reg_H2,reg_pred)
@@ -81,6 +81,13 @@ model_2<-psem(reg_H2,
               reg_pred_2)
 sum.mod2<-summary(model_2, .progressBar = F)
 sum.mod2$IC
+
+reg_H2_2<-lm(H2~Cod_pred, data=small.data)
+
+model_3<-psem(reg_H2_2,
+              reg_pred)
+sum.mod3<-summary(model_3, .progressBar = F)
+sum.mod3$IC
 
 
 ############### Causal graph ############
