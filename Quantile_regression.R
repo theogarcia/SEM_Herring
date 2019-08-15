@@ -112,8 +112,6 @@ for (i in 1:length(index)){
   plist[[i]]<-pl
 }
 
-#Multi plot
-
 
 detach(data)
 
@@ -204,7 +202,7 @@ p8<-ggplot()+
 dat.H0<-na.omit(data.frame(H2=data$H_R2,H0=data$H_0,log_H2=log(data$H_R2),
                             log_H0=log(data$H_0)))
 
-mod.H0<-qgam(log_H2~log_H0-1,data=dat.H0,qu=0.9)
+mod.H0<-qgam(log_H2~log_H0,data=dat.H0,qu=0.9)
 mod.H0.pred<- predict(mod.H0, newdata = dat.H0, se=TRUE)
 
 line_y<-c(exp(mod.H0.pred$fit),0)
@@ -249,18 +247,11 @@ p10<-ggplot()+
         axis.title.y = element_text(color = "grey20", size = 15, angle = 90, hjust = .5, vjust = .5, face = "plain"))
 
 ########################## Zcod vs Ztot
-mod.Z<-qgam(Zcod~Ztot-1,data=data,qu=0.5)
-pred.Z<- predict(mod.Z, newdata = data, se=TRUE)
-
 
 p11<-ggplot()+
   xlab("Ztot")+
   ylab("Zcod")+
   ylim(0,2)+
-  geom_ribbon(aes(ymax=pred.Z$fit+ 2*pred.Z$se.fit,
-                  ymin=pred.Z$fit- 2*pred.Z$se.fit,x=data$Ztot),
-              fill = "slategray3")+
-  geom_line(aes(y=pred.Z$fit,x=data$Ztot),data=data,colour="red",size=1.3)+
   geom_point(aes(y=aber$Zcod,x=aber$Ztot),data=aber,colour="red",size=1.7)+
   geom_point(aes(y=data$Zcod,x=data$Ztot),data=data,size=1.7)+
   geom_abline(linetype="dashed")+
@@ -299,7 +290,7 @@ plist[[length(plist)+1]]<-print(p12)
 ######################### Plot visualization #####################
 library(scales)
 #All
-tiff("Plot3.tiff", width = 595, height = 842)
+tiff("Plot3.tiff", width = 842, height = 595)
 grid.arrange(plist[[8]]+ylab("Recruits (Age0)"),
              plist[[9]]+ylab("Recruits (Age0)")+xlab("Mackerel abundance"),
              plist[[10]]+ylab("Recruits (Age2)")+xlab("Recruits (Age0)"),
@@ -312,6 +303,7 @@ grid.arrange(plist[[8]]+ylab("Recruits (Age0)"),
              plist[[6]]+ylab("Cod predation")+xlab("Cap:cod ratio"),
              plist[[7]]+ylab("Cod predation")+xlab("Cod abundance")
              + scale_x_continuous(labels = scientific),
+             plist[[12]],
              ncol=4)
 dev.off()
 #Quantile 0.9
