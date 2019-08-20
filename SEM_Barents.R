@@ -1,7 +1,6 @@
 library(Hmisc) #Lag function
 library(dplyr) 
 library(piecewiseSEM)
-library(lavaan)
 
 ###################################### Load data #######################################################
 
@@ -40,29 +39,6 @@ attach(data)
 small.data<-data.frame(na.omit(cbind(log(Cc_H),log(H_0),log(H_R2),log(Cap_cod_rat),log(Cod))))
 colnames(small.data)<-c("Cod_pred","H0","H2","CapCod","Cod")
 attach(small.data)
-hist(H_0)
-H_0_fact<-cut(H_0, breaks=3)
-
-#### Plot ####
-
-ggplot(small.data, aes(x = Cod_pred, y = H2)) + 
-  geom_point(aes(size=as.factor( H0)), alpha=0.5) + 
-  scale_size_discrete(range = c(3,9))+ theme(legend.position = "none") 
-
-plot(log(Cc_H)~log(H_0))
-abline(1,1)
-abline(lm(log(Cc_H)~log(H_0)-1))
-
-plot(log(H_R2)~log(H_0))
-abline(lm(log(H_R2)~log(H_0)))
-abline(lm(log(H_R2)~log(H_0)-1))
-
-
-plot(log(H_R2)~log(Cc_H))
-abline(lm(log(H_R2)~log(Cc_H)))
-
-plot(log(H_R2)~log(H_0))
-abline(lm(log(H_R2)~log(H_0)-1))
 
 #### SEM fit #####
 reg_H2<-lm(H2~H0+Cod_pred, data=small.data)
@@ -90,50 +66,23 @@ sum.mod3<-summary(model_3, .progressBar = F)
 sum.mod3$IC
 
 
-############### Causal graph ############
-library(ggdag)
+##Export
+library("xlsx")
+#D-sep test
+Dsep<-rbind(sum.mod1$dTable,
+sum.mod2$dTable,
+sum.mod3$dTable)
+write.xlsx(Dsep,"Dsep.xlsx")
 
-Barents_DAG <- dagify(H2 ~ H0 + Pred,
-                      Pred ~ H0 + Cod + Cap,
-                      H2~~Cod,
-                      H2~~Cap,
-                      labels = c("H2" = "Recruit\n Age 2", 
-                                    "H0" = "Recruit\n 0-group",
-                                    "Pred" = "Cod\n Predation",
-                                    "Cod" = "Cod\n Abundance",
-                                    "Cap" = "Cap:Cod\n ratio"),
-                         outcome = "H2")
+#Coefficients
+Coef_SEM<-rbind(sum.mod1$coefficients,
+            sum.mod2$coefficients,
+            sum.mod3$coefficients)
+write.xlsx(Coef_SEM,"Coef_SEM.xlsx")
 
-ggdag(Barents_DAG, text = FALSE, node = FALSE)+
-  geom_dag_text(aes(label=label),colour="black",check_overlap = T)+
-  theme_dag_blank()
-
-
-#########################""""
-library(DiagrammeR)
-
-Model1.notcor<-grViz("
-	digraph causal {
-	
-	  # Nodes
-	  node [shape = plaintext]
-	  A [label = 'Recruits \n 0-group']
-	  E [label = 'Recruits \n Age 2']
-	  B [label = 'Cod \n predation']
-	  C [label = 'Cod \n abundance']
-	  D [label = 'Cap : Cod \n ratio']
-	  
-	  # Edges
-	  edge [color = black,
-	        arrowhead = vee]
-	  rankdir = LR
-	  A->{E B}
-	  B->E
-	  C->B
-	  D->B
-	  
-	  # Graph
-	  graph [overlap = true, fontsize = 10]
-	}")
-
-Model1.notcor
+#Table R2
+R2<-cbind(sum.mod1$R2[c(1,5)],
+      sum.mod2$R2[5],
+      sum.mod3$R2[5])
+colnames(R2)[c(2:4)]<-c("Model 1","Model 2","Model 3")
+write.xlsx(R2,"R2.xlsx")
