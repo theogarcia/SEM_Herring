@@ -73,13 +73,17 @@ for (i in 1:length(index)){
   dat<-data.frame(na.omit(cbind(get(X),get(Y))))
   mod<-qgam(X2~X1,data=dat,qu=0.5)
   pred<- predict(mod, newdata = dat, se=TRUE)
+  names(mod$coefficients)[2]<-X
   colnames(dat)<-c(X,Y)
   sum<-summary(mod)
+  sum$formula<-paste(Y,"~",X)
+  
   
   output_dat[[i]] <- dat
   output_model[[i]] <- mod
   output_pred[[i]] <- pred
   output_summary[[i]] <- sum
+  names(output_summary)[[i]]<-sum$formula
   add_output[[i]]<-add
   }
 
@@ -135,15 +139,7 @@ R_up<-alpha_up_low[2]*SSB*exp(-beta_up_low[2]*SSB)
 
 
 dat.SSB<-na.omit(data.frame(H0=data$H_0,SSB=data$SSB_H))
-#mod.SSB<-qgam(log(H0/SSB)~SSB,data=dat.SSB,qu=0.9)
-#mod.SSB.pred<-predict(mod.SSB, newdata = dat.SSB, se=TRUE)
-#alpha.mod<-exp(mod$coefficients[1])
-#beta.mod<--mod$coefficients[2]
 
-
-#SSB<-seq(0,8000, by=100)
-#pred.R<-alpha*SSB*exp(-beta*SSB)
-#SSB.pred<-data.frame(SSB,pred.R)
 
 p7<-ggplot()+
   xlab("SSB")+
@@ -174,7 +170,7 @@ p7_not_lim<-ggplot()+
 
 p7_zoom<-p7_not_lim+ coord_cartesian(ylim = c(0, 800000), xlim =c(0,8000))
 
-grid.arrange(p7,p7_not_lim,p7_zoom)
+grid.arrange(p7,p7_zoom,p7_not_lim,ncol=2)
 ############## Mackerel
 
 dat.mak<-na.omit(data.frame(H0=data$H_0,mack=data$Mack,
@@ -202,18 +198,27 @@ p8<-ggplot()+
 dat.H0<-na.omit(data.frame(H2=data$H_R2,H0=data$H_0,log_H2=log(data$H_R2),
                             log_H0=log(data$H_0)))
 
-mod.H0<-qgam(log_H2~log_H0,data=dat.H0,qu=0.9)
-mod.H0.pred<- predict(mod.H0, newdata = dat.H0, se=TRUE)
 
-line_y<-c(exp(mod.H0.pred$fit),0)
-line_x<-c(dat.H0$H0,0)
+
+b<-seq(from=1, to=9,by=0.1)
+b2<-rep(NA,length=length(b))
+add<-cbind(b2,b2,b2,b)
+colnames(add)<-colnames(dat.H0)
+new_data<- rbind(dat.H0,add)
+mod.H0<-qgam(log_H2~log_H0,data=dat.H0,qu=0.9)
+mod.H0.pred<- predict(mod.H0,newdata = new_data,  se=TRUE)
+
+
+line_y<-exp(mod.H0.pred$fit)
+line_x<-exp(new_data$log_H0)
 dat.line<-data.frame(line_x,line_y)
 
 p9<-ggplot()+
   xlab("H0")+
   ylab("H2")+
+  ylim(0,150000)+
   geom_ribbon(aes(ymax=exp(mod.H0.pred$fit+ 2*mod.H0.pred$se.fit),
-                  ymin=exp(mod.H0.pred$fit- 2*mod.H0.pred$se.fit),x=dat.H0$H0),
+                  ymin=exp(mod.H0.pred$fit- 2*mod.H0.pred$se.fit),x=dat.line$line_x),
               fill = "slategray3")+
   geom_line(aes(y=line_y,x=line_x),data=dat.line,colour="red",size=1.3)+
   geom_point(aes(y=aber$H_R2,x=aber$H_0),data=aber,colour="red",size=1.7)+
@@ -251,7 +256,7 @@ p10<-ggplot()+
 p11<-ggplot()+
   xlab("Ztot")+
   ylab("Zcod")+
-  ylim(0,2)+
+  ylim(0,0.5)+
   geom_point(aes(y=aber$Zcod,x=aber$Ztot),data=aber,colour="red",size=1.7)+
   geom_point(aes(y=data$Zcod,x=data$Ztot),data=data,size=1.7)+
   geom_abline(linetype="dashed")+
@@ -269,7 +274,6 @@ p12<-ggplot()+
   xlab("H0_VPA")+
   ylab("H2_VPA")+
   ylim(0,120000)+
-  #geom_line(aes(y=VPA_H2,x=VPA_H0),data=VPA,colour="red",size=1.3)+
   geom_point(aes(y=VPA_H2,x=VPA_H0),data=VPA,size=1.7)+
   geom_abline(linetype="dashed")+
   theme(axis.title.x = element_text(color = "grey20", size = 15, angle = 0, hjust = .5, vjust = 0, face = "plain"),
@@ -291,44 +295,76 @@ plist[[length(plist)+1]]<-print(p12)
 library(scales)
 #All
 tiff("Plot3.tiff", width = 842, height = 595)
-grid.arrange(plist[[8]]+ylab("Recruits (Age0)"),
-             plist[[9]]+ylab("Recruits (Age0)")+xlab("Mackerel abundance"),
-             plist[[10]]+ylab("Recruits (Age2)")+xlab("Recruits (Age0)"),
-             plist[[11]]+ylab("Recruits (Age2)")+xlab("Cod predation"),
-             plist[[5]]+ylab("Recruits (Age0)")+xlab("Salinity anomalies"),
-             plist[[3]]+ylab("Recruits (Age0)")+xlab("Hatching date"),
-             plist[[2]]+ylab("Hatching date")+xlab("Recruit spawner (%)")+ylim(70,105),
-             plist[[1]]+ylab("Hatching date")+xlab("Spawners average age")+ylim(70,105),
-             plist[[4]]+ylab("Salinity anomalies")+xlab("ACW stress"),
-             plist[[6]]+ylab("Cod predation")+xlab("Cap:cod ratio"),
+grid.arrange(plist[[8]]+ylab("Recruits (Age0)")+ labs(title ="A)"),
+             plist[[9]]+ylab("Recruits (Age0)")+xlab("Mackerel abundance")+ labs(title ="B)"),
+             plist[[10]]+ylab("Recruits (Age2)")+xlab("Recruits (Age0)")+ labs(title ="C)"),
+             plist[[11]]+ylab("Recruits (Age2)")+xlab("Cod predation")+ labs(title ="D)"),
+             plist[[5]]+ylab("Recruits (Age0)")+xlab("Salinity anomalies")+ labs(title ="E)"),
+             plist[[3]]+ylab("Recruits (Age0)")+xlab("Hatching date")+ labs(title ="F)"),
+             plist[[2]]+ylab("Hatching date")+xlab("Recruit spawner (%)")+ylim(70,105)+ labs(title ="G)"),
+             plist[[1]]+ylab("Hatching date")+xlab("Spawners average age")+ylim(70,105)+ labs(title ="H)"),
+             plist[[4]]+ylab("Salinity anomalies")+xlab("ACW stress")+ labs(title ="I)"),
+             plist[[6]]+ylab("Cod predation")+xlab("Cap:cod ratio")+ labs(title ="J)"),
              plist[[7]]+ylab("Cod predation")+xlab("Cod abundance")
-             + scale_x_continuous(labels = scientific),
-             plist[[12]],
+             + scale_x_continuous(labels = scientific)+ labs(title ="K)"),
+             plist[[12]]+ labs(title ="L)"),
              ncol=4)
 dev.off()
-#Quantile 0.9
-grid.arrange(plist[[7]]+ylab("H_0"),
-             plist[[8]]+ylab("H_0"),
-             plist[[9]]+ylab("H_R2"),
-             plist[[10]]+ylab("H_R2")+xlab("Cc_H"),
-             ncol=2)
 
-#Quantile 0.5
-grid.arrange(plist[[4]],
-             plist[[2]],
-             plist[[3]],
-             plist[[1]],
-             plist[[5]],
-             plist[[6]],
-             ncol=2)
-             
+#Annex 1: VPA2 vs VPA0
+tiff("Plot2.tiff", width = 842, height = 595)
+plist[[13]]+xlab("Recruits (Age0-VPA)")+ylab("Recruits (Age2-VPA)")
+dev.off()
 
-#Ztot vs Zcod
-plist[[11]] #Annex
+##Export
+library("xlsx")
+#Statistics Q0.9
+tab_stat<-rbind(output_summary[[1]]$p.table[,-3],
+                output_summary[[2]]$p.table[,-3],
+                output_summary[[3]]$p.table[,-3],
+                output_summary[[4]]$p.table[,-3],
+                output_summary[[5]]$p.table[,-3],
+                output_summary[[6]]$p.table[,-3],
+                output_summary[[7]]$p.table[,-3])
 
-#VPA vs Survey
-grid.arrange(plist[[9]]+ylim(0,120000),plist[[12]],ncol=2) #Annex
+formula<-rbind(output_summary[[1]]$formula,
+               output_summary[[2]]$formula,
+               output_summary[[3]]$formula,
+               output_summary[[4]]$formula,
+               output_summary[[5]]$formula,
+               output_summary[[6]]$formula,
+               output_summary[[7]]$formula)
+
+write.xlsx(tab_stat,"tab_stat.xlsx")
+write.xlsx(formula,"formula.xlsx")
+
+#Statistics Q0.9
+
+summ_mak<-summary(mod.mak)
+summ_H0<-summary(mod.H0)
+summ_cod<-summary(mod.cod)
+
+tab_stat_90<-rbind(summ_mak$p.table[,-3],
+                   summ_H0$p.table[,-3],
+                   summ_cod$p.table[,-3])
+
+formula_q90<-c(summ_mak$formula,
+               summ_H0$formula,
+               summ_cod$formula)
+
+coef_SSB<-summary(model.ricker)$coefficients               
+rownames(coef_SSB)<-c("ln(alpha)","beta")
 
 
+write.xlsx(tab_stat_90,"tab_stat_90.xlsx")
+write.xlsx(formula_q90,"formula_q90.xlsx")
+write.xlsx(coef_SSB,"coef_SSB.xlsx")
 
+#Annex D
+tiff("Plot1.tiff", width = 842, height = 595)
+grid.arrange(p7+ labs(title ="A)"),
+             p7_zoom+ labs(title ="B)"),
+             p7_not_lim+ labs(title ="C)"),ncol=2)
+
+dev.off()
 
