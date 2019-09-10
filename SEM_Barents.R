@@ -67,22 +67,32 @@ sum.mod3$IC
 
 
 ##Export
+
+Tab2<-rbind(cbind(sum.mod1$Cstat,sum.mod1$IC[1:2]),
+      cbind(sum.mod2$Cstat,sum.mod2$IC[1:2]),
+      cbind(sum.mod3$Cstat,sum.mod3$IC[1:2]))
+rownames(Tab2)<-c("Model 1","Model 2","Model 3")      
+save(Tab2, file = "Tab2.RData")
+
+
 library("xlsx")
 #D-sep test
 Dsep<-rbind(sum.mod1$dTable,
 sum.mod2$dTable,
 sum.mod3$dTable)
 write.xlsx(Dsep,"Dsep.xlsx")
+save(Dsep, file = "Dsep.RData")
 
 #Coefficients
 Coef_SEM<-rbind(sum.mod1$coefficients,
             sum.mod2$coefficients,
             sum.mod3$coefficients)
 write.xlsx(Coef_SEM,"Coef_SEM.xlsx")
-
+save(Coef_SEM, file = "Coef_SEM.RData")
 #Table R2
 R2<-cbind(sum.mod1$R2[c(1,5)],
       sum.mod2$R2[5],
       sum.mod3$R2[5])
 colnames(R2)[c(2:4)]<-c("Model 1","Model 2","Model 3")
 write.xlsx(R2,"R2.xlsx")
+save(R2, file = "R2.RData")
