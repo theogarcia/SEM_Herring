@@ -294,9 +294,9 @@ plist[[length(plist)+1]]<-print(p12)
 ######################### Plot visualization #####################
 library(scales)
 #All
-tiff("Plot3.tiff", width = 842, height = 595)
+tiff("Plot3bis.tiff", res=300, height=8, width=12,units = "in" )
 grid.arrange(plist[[8]]+ylab("Recruits (Age0)")+ labs(title ="A)"),
-             plist[[9]]+ylab("Recruits (Age0)")+xlab("Mackerel abundance")+ labs(title ="B)"),
+             plist[[9]]+ylab("Recruits (Age0)")+ scale_x_continuous(breaks=c(15000000,22500000,30000000),labels = scientific)+xlab("Mackerel abundance")+ labs(title ="B)"),
              plist[[10]]+ylab("Recruits (Age2)")+xlab("Recruits (Age0)")+ labs(title ="C)"),
              plist[[11]]+ylab("Recruits (Age2)")+xlab("Cod predation")+ labs(title ="D)"),
              plist[[5]]+ylab("Recruits (Age0)")+xlab("Salinity anomalies")+ labs(title ="E)"),
@@ -305,15 +305,62 @@ grid.arrange(plist[[8]]+ylab("Recruits (Age0)")+ labs(title ="A)"),
              plist[[1]]+ylab("Hatching date")+xlab("Spawners average age")+ylim(70,105)+ labs(title ="H)"),
              plist[[4]]+ylab("Salinity anomalies")+xlab("ACW stress")+ labs(title ="I)"),
              plist[[6]]+ylab("Cod predation")+xlab("Cap:cod ratio")+ labs(title ="J)"),
-             plist[[7]]+ylab("Cod predation")+xlab("Cod abundance")
-             + scale_x_continuous(labels = scientific)+ labs(title ="K)"),
+             plist[[7]]+ylab("Cod predation")+xlab("Cod abundance")+
+             scale_x_continuous(breaks=c(500000,1500000,2500000),labels = scientific)+ labs(title ="K)"),
              plist[[12]]+ labs(title ="L)"),
              ncol=4)
 dev.off()
 
+
+tiff("Plotdiapo_QR.tiff", width = 842, height = 595)
+grid.arrange(plist[[10]]+ylab("Recruits (Age2)")+xlab("Recruits (Age0)"),
+             plist[[11]]+ylab("Recruits (Age2)")+xlab("Cod predation"),
+             plist[[6]]+ylab("Cod predation")+xlab("Cap:cod ratio"),
+             plist[[7]]+ylab("Cod predation")+xlab("Cod abundance")
+             + scale_x_continuous(labels = scientific),
+             ncol=2)
+dev.off()
+
+
+
+
+tiff("Plotdiapo.tiff", width = 842, height = 595)
+ggplot()+xlab("Recruits (Age0-survey)")+ylab("Recruits (Age2-XSAM)")+
+  ylim(0,120000)+
+  geom_point(aes(y=dat.H0$H2,x=dat.H0$H0),data=dat.H0,size=2.5)+
+  geom_abline(linetype="dashed")+
+  theme(axis.title.x = element_text(color = "grey20", size = 25, angle = 0, hjust = .5, vjust = 0, face = "plain"),
+        axis.title.y = element_text(color = "grey20", size = 25, angle = 90, hjust = .5, vjust = .5, face = "plain"))
+dev.off()
+
+
+
+tiff("Plotdiapo_Cod.tiff", width = 842, height = 595)
+ggplot(dat.cod,aes(dat.cod$Cod,dat.cod$H2))+ylab("Recruits (Age2)")+xlab("Cod predation")+
+  geom_point(size=2.5)+
+  theme(axis.title.x = element_text(color = "grey20", size = 40, angle = 0, hjust = .5, vjust = 0, face = "plain"),
+        axis.title.y = element_text(color = "grey20", size = 40, angle = 90, hjust = .5, vjust = .5, face = "plain"))
+dev.off()
+
+
+
+tiff("Plotdiapo_Codline.tiff", width = 842, height = 595)
+ggplot(dat.cod,aes(dat.cod$Cod,dat.cod$H2))+ylab("Recruits (Age2)")+xlab("Cod predation")+
+  geom_point(size=2.5)+
+  geom_smooth(method='lm',formula=y~x,colour="red",size=1.3,se=F)+
+  theme(axis.title.x = element_text(color = "grey20", size = 40, angle = 0, hjust = .5, vjust = 0, face = "plain"),
+        axis.title.y = element_text(color = "grey20", size = 40, angle = 90, hjust = .5, vjust = .5, face = "plain"))
+dev.off()
+
 #Annex 1: VPA2 vs VPA0
 tiff("Plot2.tiff", width = 842, height = 595)
-plist[[13]]+xlab("Recruits (Age0-VPA)")+ylab("Recruits (Age2-VPA)")
+ggplot()+
+  ylim(0,120000)+
+  geom_point(aes(y=VPA_H2,x=VPA_H0),data=VPA,size=2.5)+
+  geom_abline(linetype="dashed")+xlab("Recruits (Age0-VPA)")+ylab("Recruits (Age2-VPA)")+
+  theme(axis.title.x = element_text(color = "grey20", size = 25, angle = 0, hjust = .5, vjust = 0, face = "plain"),
+        axis.title.y = element_text(color = "grey20", size = 25, angle = 90, hjust = .5, vjust = .5, face = "plain"))
+
 dev.off()
 
 ##Export
@@ -326,6 +373,7 @@ tab_stat<-rbind(output_summary[[1]]$p.table[,-3],
                 output_summary[[5]]$p.table[,-3],
                 output_summary[[6]]$p.table[,-3],
                 output_summary[[7]]$p.table[,-3])
+coefficient<-row.names(tab_stat)
 
 formula<-rbind(output_summary[[1]]$formula,
                output_summary[[2]]$formula,
@@ -335,8 +383,8 @@ formula<-rbind(output_summary[[1]]$formula,
                output_summary[[6]]$formula,
                output_summary[[7]]$formula)
 
-write.xlsx(tab_stat,"tab_stat.xlsx")
-write.xlsx(formula,"formula.xlsx")
+save(tab_stat, file = "tab_stat.RData")
+save(formula, file = "formula.RData")
 
 #Statistics Q0.9
 
@@ -355,10 +403,9 @@ formula_q90<-c(summ_mak$formula,
 coef_SSB<-summary(model.ricker)$coefficients               
 rownames(coef_SSB)<-c("ln(alpha)","beta")
 
-
-write.xlsx(tab_stat_90,"tab_stat_90.xlsx")
-write.xlsx(formula_q90,"formula_q90.xlsx")
-write.xlsx(coef_SSB,"coef_SSB.xlsx")
+save(tab_stat_90, file = "tab_stat_90.RData")
+save(formula_q90, file = "formula_q90.RData")
+save(coef_SSB, file = "coef_SSB.RData")
 
 #Annex D
 tiff("Plot1.tiff", width = 842, height = 595)
