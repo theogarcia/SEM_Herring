@@ -13,9 +13,10 @@ Index_pop_str<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herri
 Mean_Hatch_Date<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/Mean_Hatch_Date.RData"))
 Cod_cons<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/Cod.RData"))
 Kola<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/output/Temperature_Kola.RData"))
+TORESEN<-get(load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data_preparation/original_data/TORESEN.RData"))
 
 ######################## Select Ts in datasets ###########################
-
+TORESEN<-TORESEN[,c(1,27,29)]
 Mack<-apply(WGIDE[,c(38:50)],MARGIN=1,FUN=sum)
 wgide<-data.frame(WGIDE[,c(1,2,13)],Mack)
 
@@ -47,6 +48,6 @@ colnames(Cod_cons)[2]<-"Cc_H"
 colnames(Kola)[3]<-c("years")
 ######################### Merge into an unique dataset ##################################
 
-data<-Reduce(function(x,y) merge(x = x, y = y, by = "years",all=T), list(wgide, wginor, afwg,sjomil,acw,Index_perc_str,Index_pop_str,Salinity,Mean_Hatch_Date,Cod_cons,Kola))
+data<-Reduce(function(x,y) merge(x = x, y = y, by = "years",all=T), list(wgide, wginor, afwg,sjomil,acw,Index_perc_str,Index_pop_str,Salinity,Mean_Hatch_Date,Cod_cons,Kola,TORESEN))
 save(data, file = "C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data.Rdata")
 
