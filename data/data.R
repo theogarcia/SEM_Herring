@@ -23,8 +23,9 @@ wgide<-data.frame(WGIDE[,c(1,2,13)],Mack)
 wginor<-data.frame(WGINOR[,c(1,2)])
 
 Cod<-apply(AFWG[,c(2:5)],MARGIN=1,FUN=sum)
+Cod2<-apply(AFWG[,c(2:7)],MARGIN=1,FUN=sum)
 Cap_cod_rat<-(AFWG$SSB_Ca*10^9)/(AFWG$C_RT*10^3)
-afwg<-data.frame(AFWG[,c(1,24)],Cod,Cap_cod_rat)
+afwg<-data.frame(AFWG[,c(1,24)],Cod,Cap_cod_rat,Cod2)
 
 colnames(Salinity)[1]<-c("years")
 
