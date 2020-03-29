@@ -45,8 +45,8 @@ data[which((data$H_R2/data$H_0)>1),6]<-NA
 attach(data)
 
 #################################### Relationships data #################################
-x<-c("Mack","H_0","Cc_H","smooth_temp_kola","Mack","smooth_temp_kola","Age_index1","Age_index2","mean_hatch","ACW_stress","Sal_I2","Cap_cod_rat","Cod2","mean_hatch","Sal_I2")
-y<-c("H_0","H_R2","H_R2","H_0","H_R2","H_R2","mean_hatch","mean_hatch","H_0","Sal_I2","H_0","Cc_H","Cc_H","H_R2","H_R2")
+x<-c("Mack","H_0","Cc_H","smooth_temp_kola","Mack","smooth_temp_kola","Age_index1","Age_index2","mean_hatch","ACW_stress","Sal_I2","Cap_cod_rat","Cod2","mean_hatch","Sal_I2","ACW_stress")
+y<-c("H_0","H_R2","H_R2","H_0","H_R2","H_R2","mean_hatch","mean_hatch","H_0","H_0","H_0","Cc_H","Cc_H","H_R2","H_R2","H_R2")
 
 #x<-c(,"Mack","H_0","Cc_H","Temp_kola","smooth_temp_kola","Temp_kola","smooth_temp_kola","Temp_kola","smooth_temp_kola")
 #y<-c(,"H_0","H_R2","H_R2","H_0","H_0","H_VPA_R2","H_VPA_R2","H_R2","H_R2")
@@ -59,11 +59,13 @@ model<-NULL
 pred<-NULL
 add<-NULL
 sum<-NULL
+
 output_dat<-list()
 output_model<-list()
 output_pred<-list()
 add_output<-list()
 output_summary<-list()
+
 
 #Calculations
 for (i in 1:length(index)){
@@ -82,6 +84,11 @@ for (i in 1:length(index)){
   sum<-summary(mod)
   sum$formula<-paste(Y,"~",X)
   
+  par(mfrow=c(2,3))
+  gam.check(mod)
+  acf(mod$residuals)
+  plot.new()
+  mtext(paste0(Y,"~",X), outer = TRUE,  cex=1, line=-1.5)
   
   output_dat[[i]] <- dat
   output_model[[i]] <- mod
@@ -89,6 +96,7 @@ for (i in 1:length(index)){
   output_summary[[i]] <- sum
   names(output_summary)[[i]]<-sum$formula
   add_output[[i]]<-add
+
 }
 
 #Function to plot output of loop
@@ -118,32 +126,12 @@ plist<-list()
 for (i in 1:length(index)){
   pl<-plot_quantile(output_dat[i],output_pred[i],add_output[i])
   plist[[i]]<-pl
+  
 }
-
 
 detach(data)
 
 ############################## Quantile regression (limit) ################################
-
-######################### Plot visualization #####################
-library(scales)
-#All
-#tiff("Plot_control.tiff", res=300, height=8, width=12,units = "in" )
-#grid.arrange(plist[[4]]+ylab("Salinity anomalies")+xlab("ACW stress")+ labs(title ="A)"),
-#             plist[[1]]+ylab("Hatching date")+xlab("Spawners average age")+ylim(70,110)+ labs(title ="B)"),
-#             plist[[2]]+ylab("Hatching date")+xlab("Recruit spawner (%)")+ylim(70,110)+ labs(title ="C)"),ggplot() + theme_void(),
-#             plist[[11]]+ylab("Recruits (Age0)")+ labs(title ="D)"),
-#             plist[[8]]+ylab("Recruits (Age0)")+ scale_x_continuous(breaks=c(15000000,22500000,30000000),labels = scientific)+xlab("Mackerel abundance")+ labs(title ="E)"),
-#             plist[[5]]+ylab("Recruits (Age0)")+xlab("Salinity anomalies")+ labs(title ="F)"),
-#             plist[[3]]+ylab("Recruits (Age0)")+xlab("Hatching date")+ labs(title ="G)"),
-#             plist[[7]]+ylab("Cod predation")+xlab("Cod abundance")+
-#               scale_x_continuous(breaks=c(500000,1500000,2500000),labels = scientific)+ labs(title ="H)"),
-#             plist[[6]]+ylab("Cod predation")+xlab("Cap:cod ratio")+ labs(title ="I)"),
-#             plist[[9]]+ylab("Recruits (Age2)")+xlab("Recruits (Age0)")+ labs(title ="J)"),
-#             plist[[10]]+ylab("Recruits (Age2)")+xlab("Cod predation")+ labs(title ="K)"),
-#             ncol=4)
-#dev.off()
-
 
 #################################### Relationships data #################################
 attach(data)
@@ -181,6 +169,11 @@ for (i in 1:length(index)){
   sum<-summary(mod)
   sum$formula<-paste(Y,"~",X)
   
+  par(mfrow=c(2,3))
+  gam.check(mod)
+  acf(mod$residuals)
+  plot.new()
+  mtext(paste0(Y,"~",X), outer = TRUE,  cex=1, line=-1.5)
   
   output_dat_rq[[i]] <- dat
   output_model_rq[[i]] <- mod
@@ -230,20 +223,15 @@ for (i in 1:length(index)){
 }
 
 
-#Create all the plots, and save into a list
-#plist_rq<-list()
-#for (i in 1:length(index)){
-#  pl<-plot_quantile(output_dat_rq[i],output_pred_rq[i],add_output_rq[i])
-#  plist_rq[[i]]<-pl
-#}
-
-
 detach(data)
 
 ################# Ricker #####
 ##Control
 model.ricker.c1<-rq(log(data$H_0/data$SSB_H)~data$SSB_H, tau=0.5)
 model.ricker.coef.c1<-model.ricker.c1$coefficients
+
+par(mfrow=c(1,1))
+acf(model.ricker.c1$residuals)
 
 alpha_up_low.c1<-exp(summary(model.ricker.c1)$coefficients[1,c(2,3)])
 beta_up_low.c1<--summary(model.ricker.c1)$coefficients[2,c(2,3)]
@@ -262,6 +250,7 @@ dat.SSB.c1<-na.omit(data.frame(H_0=data$H_0,SSB=data$SSB_H))
 #Limiting
 model.ricker1<-rq(log(data$H_0/data$SSB_H)~data$SSB_H, tau=0.9)
 model.ricker.coef1<-model.ricker1$coefficients
+acf(model.ricker1$residuals)
 
 alpha_up_low1<-exp(summary(model.ricker1)$coefficients[1,c(2,3)])
 beta_up_low1<--summary(model.ricker1)$coefficients[2,c(2,3)]
@@ -282,17 +271,18 @@ p_H0SSB<-ggplot()+
   xlab("SSB")+
   ylab("H0")+
   #ylim(0,75000)+
-  ylim(0,800000)+
-  #geom_ribbon(aes(ymax=R_up1,
-  #                ymin=R_low1,x=SSB1),
-  #            fill = "dodgerblue",alpha = 0.6)+
-  #geom_ribbon(aes(ymax=R_up.c1,
-  #                ymin=R_low.c1,x=SSB1),
-  #            fill = "firebrick1",alpha = 0.6)+
+  #ylim(0,800000)+
+  geom_ribbon(aes(ymax=R_up1,
+                  ymin=R_low1,x=SSB1),
+              fill = "dodgerblue",alpha = 0.6)+
+  geom_ribbon(aes(ymax=R_up.c1,
+                  ymin=R_low.c1,x=SSB1),
+              fill = "firebrick1",alpha = 0.6)+
   geom_line(aes(y=R.c1,x=SSB.c1),colour="red",size=1.3)+
   geom_line(aes(y=R1,x=SSB1),colour="blue",size=1.3)+
   geom_point(aes(y=H_0,x=SSB),data=dat.SSB.c1,size=1.7)+
-  geom_point(aes(y=H_0,x=SSB_H),data=aber,size=1.7,colour="red")+
+  geom_point(aes(y=H_0,x=SSB_H),data=aber,size=1.7,colour="red")+ 
+  coord_cartesian(ylim = c(0,800000), xlim =c(0,8000))+
   theme(axis.title.x = element_text(color = "grey20", size = 15, angle = 0, hjust = .5, vjust = 0, face = "plain"),
         axis.title.y = element_text(color = "grey20", size = 15, angle = 90, hjust = .5, vjust = .5, face = "plain"))
 
@@ -300,6 +290,7 @@ p_H0SSB<-ggplot()+
 ##Control
 model.ricker.c<-rq(log(data$H_R2/data$SSB_H)~data$SSB_H, tau=0.5)
 model.ricker.coef.c<-model.ricker.c$coefficients
+acf(model.ricker.c$residuals)
 
 alpha_up_low.c<-exp(summary(model.ricker.c)$coefficients[1,c(2,3)])
 beta_up_low.c<--summary(model.ricker.c)$coefficients[2,c(2,3)]
@@ -318,6 +309,7 @@ dat.SSB.c<-na.omit(data.frame(H_R2=data$H_R2,SSB=data$SSB_H))
 #Limiting
 model.ricker<-rq(log(data$H_R2/data$SSB_H)~data$SSB_H, tau=0.9)
 model.ricker.coef<-model.ricker$coefficients
+acf(model.ricker$residuals)
 
 alpha_up_low<-exp(summary(model.ricker)$coefficients[1,c(2,3)])
 beta_up_low<--summary(model.ricker)$coefficients[2,c(2,3)]
@@ -368,24 +360,37 @@ p7bis<-ggplot()+#H2~SSB without confidence interval
   #geom_point(aes(y=H_R2,x=SSB_H),data=aber,size=1.7,colour="red")+
   theme(axis.title.x = element_text(color = "grey20", size = 15, angle = 0, hjust = .5, vjust = 0, face = "plain"),
         axis.title.y = element_text(color = "grey20", size = 15, angle = 90, hjust = .5, vjust = .5, face = "plain"))
+############################################
+dat_2<-data.frame(na.omit(cbind(data$H_R2,data$SSB_H)))
+colnames(dat_2)<-c("H_R2","SSB_H")
+modSR9<-qgam(log(H_R2/SSB_H)~SSB_H,data=dat_2,qu=0.9)
+modSR5<-qgam(log(H_R2/SSB_H)~SSB_H,data=dat_2,qu=0.5)
+
+dat_3<-data.frame(na.omit(cbind(data$H_0,data$SSB_H)))
+colnames(dat_3)<-c("H_0","SSB_H")
+mod0SR9<-qgam(log(H_0/SSB_H)~SSB_H,data=dat_3,qu=0.9)
+mod0SR5<-qgam(log(H_0/SSB_H)~SSB_H,data=dat_3,qu=0.5)
 
 
 
 #######################################################
-tiff("Plot_results.tiff", res=300, height=8, width=12,units = "in" )
-grid.arrange(p_H0SSB+ylab("Recruits (Age0)")+ labs(title ="A)"),
-             plist[[9+2]]+ylab("Recruits (Age0)")+xlab("Salinity anomalies")+labs(title ="B)"),
-             plist[[8+2]]+ylab("Salinity anomalies")+xlab("ACW stress")+ labs(title ="C)"),
+library(scales)
+
+tiff("Plot_results_conf.tiff", res=300, height=8, width=12,units = "in" )
+grid.arrange(p_H0SSB+ylab("Abundance (Age0)")+ labs(title ="A)"),
+             #plist[[9+2]]+ylab("Abundance (Age0)")+xlab("Salinity anomalies")+labs(title ="B)"),
+             plist[[8+2]]+ylab("Abundance (Age0)")+xlab("ACW stress")+ labs(title ="B)"),
+             plist[[11]]+ylab("Abundance (Age0)")+xlab("Salinity anomalies")+ labs(title ="C)"),
              plist[[5+2]]+ylab("Hatching date")+xlab("Spawners average age")+ylim(70,110)+ labs(title ="D)"),
              plist[[6+2]]+ylab("Hatching date")+xlab("Recruit spawner (%)")+ylim(70,110)+ labs(title ="E)"),
-             plist[[7+2]]+ylab("Recruits (Age0)")+xlab("Hatching date")+ labs(title ="F)"),
-             plist_test[[4]]+ylab("Recruits (Age0)")+xlab("Temperature")+ labs(title ="G)"),
-             plist_test[[1]]+ylab("Recruits (Age0)")+ scale_x_continuous(breaks=c(15000000,22500000,30000000),labels = scientific)+xlab("Mackerel abundance")+ labs(title ="H)"),
-             plist_test[[3]]+ylab("Recruits (Age2)")+xlab("Cod predation")+ labs(title ="I)"),
+             plist[[7+2]]+ylab("Abundance (Age0)")+xlab("Hatching date")+ labs(title ="F)"),
+             plist_test[[4]]+ylab("Abundance (Age0)")+xlab("Temperature")+ labs(title ="G)"),
+             plist_test[[1]]+ylab("Abundance (Age0)")+ scale_x_continuous(breaks=c(15000000,22500000,30000000),labels = scientific)+xlab("Mackerel abundance")+ labs(title ="H)"),
+             plist_test[[3]]+ylab("Abundance (Age2)")+xlab("Cod predation")+ labs(title ="I)"),
              plist[[10+2]]+ylab("Cod predation")+xlab("Cap:cod ratio")+ labs(title ="J)"),
              plist[[11+2]]+ylab("Cod predation")+xlab("Cod abundance")+
                scale_x_continuous(breaks=c(500000,1500000,2500000),labels = scientific)+labs(title ="K)"),
-             plist_test[[2]]+ylab("Recruits (Age2)")+xlab("Recruits (Age0)")+ labs(title ="L)"),
+             plist_test[[2]]+ylab("Abundance (Age2)")+xlab("Abundance (Age0)")+ labs(title ="L)"),
              ncol=4)
 dev.off()
 
@@ -404,13 +409,15 @@ dev.off()
 
 #######################################################
 ##Plot H2 
-tiff("Plot_results2.tiff", res=300, height=8, width=12,units = "in" )
+tiff("Plot_results2_conf.tiff", res=300, height=8, width=12,units = "in" )
 
-grid.arrange(plist[[15]]+ylab("Recruits (Age2)")+xlab("Salinity anomalies")+ labs(title ="A)"),
-             p7bis+ylab("Recruits (Age2)")+ labs(title ="B)"),
-             plist[[14]]+ylab("Recruits (Age2)")+xlab("Hatching date")+ labs(title ="C)"),
-             plist_test[[5]]+ylab("Recruits (Age2)")+xlab("Mackerel abundance")+ labs(title ="D)"),
-             plist_test[[6]]+ylab("Recruits (Age2)")+xlab("Temperature")+ labs(title ="E)"),
+grid.arrange(p7+ylab("Abundance (Age2)")+ labs(title ="A)"),
+             plist[[16]]+ylab("Abundance (Age2)")+xlab("ACW stress")+ labs(title ="B)"),
+             plist[[15]]+ylab("Abundance (Age2)")+xlab("Salinity anomalies")+ labs(title ="C)"),
+             plist[[14]]+ylab("Abundance (Age2)")+xlab("Hatching date")+ labs(title ="D)"),
+             plist_test[[6]]+ylab("Abundance (Age2)")+xlab("Temperature")+ labs(title ="E)"),
+             plist_test[[5]]+ylab("Abundance (Age2)")+xlab("Mackerel abundance")+ labs(title ="F)"),
+
              
              #p7bis+ylab("Recruits (Age2)")+ labs(title ="F)"),
              ncol=3)
