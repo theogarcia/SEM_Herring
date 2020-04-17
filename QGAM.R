@@ -10,7 +10,7 @@ library(gridExtra)
 library(grid)
 ###################################### Load data #######################################################
 
-load("C:/Users/moi/Desktop/Stage/Script/SEM_Herring/SEM_Herring/data/data.RData")
+load("data/data.RData")
 
 #################################### Lag variables #####################################################
 #logN2<-log(data$H_R2)
