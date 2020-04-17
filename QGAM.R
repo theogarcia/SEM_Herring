@@ -203,7 +203,7 @@ plot_2quantile<-function(dat.list,pred.list,add.list,
     geom_line(aes(y=df_pred$fit,x=df[,1]),data=df,colour="red",size=1.3)+
     #geom_line(aes(y=df_pred$fit + 2*df_pred$se.fit,x=df[,1]),data=df,colour="red",linetype = "dashed",size=1.3)+
     #geom_line(aes(y=df_pred$fit - 2*df_pred$se.fit,x=df[,1]),data=df,colour="red",linetype = "dashed",size=1.3)+
-    geom_line(aes(y=df_pred.rq$fit,x=df[,1]),data=df.rq,colour="blue",size=1.3)+
+    geom_line(aes(y=df_pred.rq$fit,x=df[,1]),data=df.rq,colour="blue",size=1.3,linetype="dashed")+
     #geom_line(aes(y=df_pred.rq$fit + 2*df_pred.rq$se.fit,x=df.rq[,1]),data=df.rq,colour="blue",linetype = "dashed",size=1.3)+
     #geom_line(aes(y=df_pred.rq$fit - 2*df_pred.rq$se.fit,x=df.rq[,1]),data=df.rq,colour="blue",linetype = "dashed",size=1.3)+
     geom_point(aes(y=df_add[,2],x=df_add[,1]),data=df_add,colour="red",size=1.7)+
@@ -279,7 +279,7 @@ p_H0SSB<-ggplot()+
                   ymin=R_low.c1,x=SSB1),
               fill = "firebrick1",alpha = 0.6)+
   geom_line(aes(y=R.c1,x=SSB.c1),colour="red",size=1.3)+
-  geom_line(aes(y=R1,x=SSB1),colour="blue",size=1.3)+
+  geom_line(aes(y=R1,x=SSB1),colour="blue",size=1.3,linetype="dashed")+
   geom_point(aes(y=H_0,x=SSB),data=dat.SSB.c1,size=1.7)+
   geom_point(aes(y=H_0,x=SSB_H),data=aber,size=1.7,colour="red")+ 
   coord_cartesian(ylim = c(0,800000), xlim =c(0,8000))+
@@ -338,7 +338,7 @@ p7<-ggplot()+ #H2~SSB with confidence interval
                   ymin=R_low.c,x=SSB),
               fill = "firebrick1",alpha = 0.6)+
   geom_line(aes(y=R.c,x=SSB.c),colour="red",size=1.3)+
-  geom_line(aes(y=R,x=SSB),colour="blue",size=1.3)+
+  geom_line(aes(y=R,x=SSB),colour="blue",size=1.3,linetype="dashed")+
   geom_point(aes(y=H_R2,x=SSB),data=dat.SSB.c,size=1.7)+
   #geom_point(aes(y=H_R2,x=SSB_H),data=aber,size=1.7,colour="red")+
   theme(axis.title.x = element_text(color = "grey20", size = 15, angle = 0, hjust = .5, vjust = 0, face = "plain"),
@@ -355,7 +355,7 @@ p7bis<-ggplot()+#H2~SSB without confidence interval
   #                ymin=R_low.c,x=SSB),
   #            fill = "firebrick1",alpha = 0.6)+
   geom_line(aes(y=R.c,x=SSB.c),colour="red",size=1.3)+
-  geom_line(aes(y=R,x=SSB),colour="blue",size=1.3)+
+  geom_line(aes(y=R,x=SSB),colour="blue",size=1.3,linetype="dashed")+
   geom_point(aes(y=H_R2,x=SSB),data=dat.SSB.c,size=1.7)+
   #geom_point(aes(y=H_R2,x=SSB_H),data=aber,size=1.7,colour="red")+
   theme(axis.title.x = element_text(color = "grey20", size = 15, angle = 0, hjust = .5, vjust = 0, face = "plain"),
