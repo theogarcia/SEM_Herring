@@ -25,6 +25,7 @@ data$smooth_temp_kola<-Lag(data$smooth_temp_kola,1)
 data$H_VPA_R0<-Lag(data$H_VPA_R0,2)
 data$Puff<-Lag(data$Puff,2)
 data$Mack<-Lag(data$Mack,2)
+data$plank<-Lag(data$plank,2)
 data$H_0<-Lag(data$H_0,2)
 data$T_Ssum<-Lag(data$T_Ssum,2)
 data$Cal_fin<-Lag(data$Cal_fin,2)
@@ -45,8 +46,8 @@ data[which((data$H_R2/data$H_0)>1),6]<-NA
 attach(data)
 
 #################################### Relationships data #################################
-x<-c("Mack","H_0","Cc_H","smooth_temp_kola","Mack","smooth_temp_kola","Age_index1","Age_index2","mean_hatch","ACW_stress","Sal_I2","Cap_cod_rat","Cod2","mean_hatch","Sal_I2","ACW_stress")
-y<-c("H_0","H_R2","H_R2","H_0","H_R2","H_R2","mean_hatch","mean_hatch","H_0","H_0","H_0","Cc_H","Cc_H","H_R2","H_R2","H_R2")
+x<-c("Mack","H_0","Cc_H","smooth_temp_kola","Mack","smooth_temp_kola","SSB_H","SSB_H","plank","plank","Age_index1","Age_index2","mean_hatch","ACW_stress","Sal_I2","Cap_cod_rat","Cod2","mean_hatch","Sal_I2","ACW_stress")
+y<-c("H_0","H_R2","H_R2","H_0","H_R2","H_R2","H_0","H_R2","H_0","H_R2","mean_hatch","mean_hatch","H_0","H_0","H_0","Cc_H","Cc_H","H_R2","H_R2","H_R2")
 
 #x<-c(,"Mack","H_0","Cc_H","Temp_kola","smooth_temp_kola","Temp_kola","smooth_temp_kola","Temp_kola","smooth_temp_kola")
 #y<-c(,"H_0","H_R2","H_R2","H_0","H_0","H_VPA_R2","H_VPA_R2","H_R2","H_R2")
@@ -135,8 +136,8 @@ detach(data)
 
 #################################### Relationships data #################################
 attach(data)
-x<-c("Mack","H_0","Cc_H","smooth_temp_kola","Mack","smooth_temp_kola")
-y<-c("H_0","H_R2","H_R2","H_0","H_R2","H_R2")
+x<-c("Mack","H_0","Cc_H","smooth_temp_kola","Mack","smooth_temp_kola","SSB_H","SSB_H","plank","plank")
+y<-c("H_0","H_R2","H_R2","H_0","H_R2","H_R2","H_0","H_R2","H_0","H_R2")
 index<-c(length(plist)+1:length(x))
 RD<-data.frame(x,y,index)
 
@@ -377,49 +378,36 @@ mod0SR5<-qgam(log(H_0/SSB_H)~SSB_H,data=dat_3,qu=0.5)
 library(scales)
 
 tiff("Plot_results_conf.tiff", res=300, height=8, width=12,units = "in" )
-grid.arrange(p_H0SSB+ylab("Abundance (Age0)")+ labs(title ="A)"),
+grid.arrange(p_H0SSB+ylab("Abundance (Age0)")+xlab("SSB")+ labs(title ="A)"),
              #plist[[9+2]]+ylab("Abundance (Age0)")+xlab("Salinity anomalies")+labs(title ="B)"),
-             plist[[8+2]]+ylab("Abundance (Age0)")+xlab("ACW stress")+ labs(title ="B)"),
-             plist[[11]]+ylab("Abundance (Age0)")+xlab("Salinity anomalies")+ labs(title ="C)"),
-             plist[[5+2]]+ylab("Hatching date")+xlab("Spawners average age")+ylim(70,110)+ labs(title ="D)"),
-             plist[[6+2]]+ylab("Hatching date")+xlab("Recruit spawner (%)")+ylim(70,110)+ labs(title ="E)"),
-             plist[[7+2]]+ylab("Abundance (Age0)")+xlab("Hatching date")+ labs(title ="F)"),
+             plist[[14]]+ylab("Abundance (Age0)")+xlab("ACW stress")+ labs(title ="B)"),
+             plist[[15]]+ylab("Abundance (Age0)")+xlab("Salinity anomalies")+ labs(title ="C)"),
+             plist[[11]]+ylab("Hatching date")+xlab("Spawners average age")+ylim(70,110)+ labs(title ="D)"),
+             plist[[12]]+ylab("Hatching date")+xlab("Recruit spawner (%)")+ylim(70,110)+ labs(title ="E)"),
+             plist[[13]]+ylab("Abundance (Age0)")+xlab("Hatching date")+ labs(title ="F)"),
              plist_test[[4]]+ylab("Abundance (Age0)")+xlab("Temperature")+ labs(title ="G)"),
              plist_test[[1]]+ylab("Abundance (Age0)")+ scale_x_continuous(breaks=c(15000000,22500000,30000000),labels = scientific)+xlab("Mackerel abundance")+ labs(title ="H)"),
-             plist_test[[3]]+ylab("Abundance (Age2)")+xlab("Cod predation")+ labs(title ="I)"),
-             plist[[10+2]]+ylab("Cod predation")+xlab("Cap:cod ratio")+ labs(title ="J)"),
-             plist[[11+2]]+ylab("Cod predation")+xlab("Cod abundance")+
-               scale_x_continuous(breaks=c(500000,1500000,2500000),labels = scientific)+labs(title ="K)"),
-             plist_test[[2]]+ylab("Abundance (Age2)")+xlab("Abundance (Age0)")+ labs(title ="L)"),
+             plist_test[[9]]+ylab("Abundance (Age0)")+xlab("Zooplankton biomass")+ labs(title ="I)"),
+             plist_test[[3]]+ylab("Abundance (Age2)")+xlab("Cod predation")+ labs(title ="J)"),
+             plist[[16]]+ylab("Cod predation")+xlab("Cap:cod ratio")+ labs(title ="K)"),
+             plist[[17]]+ylab("Cod predation")+xlab("Cod abundance")+
+               scale_x_continuous(breaks=c(500000,1500000,2500000),labels = scientific)+labs(title ="L)"),
+             plist_test[[2]]+ylab("Abundance (Age2)")+xlab("Abundance (Age0)")+ labs(title ="M)"),
              ncol=4)
 dev.off()
 
 
 #######################################################
-#sup_4T<-data[which(data$smooth_temp_kola>4),]
-#library(ggrepel)
-
-#tiff("Plot_date_temperature.tiff", res=300, height=8, width=12,units = "in" )
-
-#plist[[4]]+geom_text_repel(aes(x =sup_4T$smooth_temp_kola,
-#                               y = sup_4T$H_0,
-#                               label = sup_4T$years),size = 4)+
-#  xlab("Temperature")+ylab("Recruits (Age0)")
-#dev.off()
-
-#######################################################
 ##Plot H2 
 tiff("Plot_results2_conf.tiff", res=300, height=8, width=12,units = "in" )
 
-grid.arrange(p7+ylab("Abundance (Age2)")+ labs(title ="A)"),
-             plist[[16]]+ylab("Abundance (Age2)")+xlab("ACW stress")+ labs(title ="B)"),
-             plist[[15]]+ylab("Abundance (Age2)")+xlab("Salinity anomalies")+ labs(title ="C)"),
-             plist[[14]]+ylab("Abundance (Age2)")+xlab("Hatching date")+ labs(title ="D)"),
+grid.arrange(p7+ylab("Abundance (Age2)")+xlab("SSB")+ labs(title ="A)"),
+             plist[[20]]+ylab("Abundance (Age2)")+xlab("ACW stress")+ labs(title ="B)"),
+             plist[[19]]+ylab("Abundance (Age2)")+xlab("Salinity anomalies")+ labs(title ="C)"),
+             plist[[18]]+ylab("Abundance (Age2)")+xlab("Hatching date")+ labs(title ="D)"),
              plist_test[[6]]+ylab("Abundance (Age2)")+xlab("Temperature")+ labs(title ="E)"),
              plist_test[[5]]+ylab("Abundance (Age2)")+xlab("Mackerel abundance")+ labs(title ="F)"),
-
-             
-             #p7bis+ylab("Recruits (Age2)")+ labs(title ="F)"),
+             plist_test[[10]]+ylab("Abundance (Age2)")+xlab("Zooplankton biomass")+ labs(title ="G)"),
              ncol=3)
 dev.off()
 
@@ -436,6 +424,67 @@ plotZtotZcod<-ggplot()+
         axis.title.y = element_text(color = "grey20", size = 15, angle = 90, hjust = .5, vjust = .5, face = "plain"))
 
 plotZtotZcod
+dev.off()
+#################################################
+
+small_zoo<-data$plank[which(data$plank<5)]
+small_age0<-data$H_0[which(data$plank<5)]
+small_age2<-data$H_R2[which(data$plank<5)]
+small_data<-data.frame(small_zoo,small_age0,small_age2)
+
+
+zoo_0_0.5<-qgam(small_age0~s(small_zoo, k=3),data=small_data,qu=0.5)
+zoo_0_0.9<-qgam(small_age0~s(small_zoo, k=3),data=small_data,qu=0.9)
+
+zoo_2_0.5<-qgam(small_age2~s(small_zoo, k=3),data=small_data,qu=0.5)
+zoo_2_0.9<-qgam(small_age2~s(small_zoo, k=3),data=small_data,qu=0.9)
+
+
+
+pred_zoo_0_0.5<- predict(zoo_0_0.5, newdata = small_data, se=TRUE)
+pred_zoo_0_0.9<- predict(zoo_0_0.9, newdata = small_data, se=TRUE)
+
+
+pred_zoo_2_0.5<- predict(zoo_2_0.5, newdata = small_data, se=TRUE)
+pred_zoo_2_0.9<- predict(zoo_2_0.9, newdata = small_data, se=TRUE)
+
+
+
+pl_0<-plot_2quantile(small_data[,1:2],pred_zoo_0_0.5,add_output[9],
+                     small_data[,1:2],pred_zoo_0_0.9,add_output_rq[9])
+
+pl_1<-plot_2quantile(small_data[,c(1,3)],pred_zoo_2_0.5,add_output[10],
+                     small_data[,c(1,3)],pred_zoo_2_0.9,add_output_rq[10])
+
+
+
+  
+pl_0<-ggplot()+ylab("Abundance (Age0)")+xlab("Zooplankton biomass")+
+    geom_ribbon(aes(ymax=pred_zoo_0_0.5$fit + 2*pred_zoo_0_0.5$se.fit,ymin=pred_zoo_0_0.5$fit - 2*pred_zoo_0_0.5$se.fit,x=small_data[,1]),
+                fill = "firebrick1",alpha = 0.6)+
+    geom_ribbon(aes(ymax=pred_zoo_0_0.9$fit + 2*pred_zoo_0_0.9$se.fit,ymin=pred_zoo_0_0.9$fit - 2*pred_zoo_0_0.9$se.fit,x=small_data[,1]),
+                fill = "dodgerblue",alpha = 0.6)+
+    geom_line(aes(y=pred_zoo_0_0.5$fit,x=small_data[,1]),data=small_data,colour="red",size=1.3)+
+    geom_line(aes(y=pred_zoo_0_0.9$fit,x=small_data[,1]),data=small_data,colour="blue",size=1.3,linetype="dashed")+
+    geom_point(aes(y=small_data[,2],x=small_data[,1]),data=small_data,size=1.7)+
+    theme(axis.title.x = element_text(color = "grey20", size = 15, angle = 0, hjust = .5, vjust = 0, face = "plain"),
+          axis.title.y = element_text(color = "grey20", size = 15, angle = 90, hjust = .5, vjust = .5, face = "plain"))
+
+
+pl_2<-ggplot()+ylab("Abundance (Age2)")+xlab("Zooplankton biomass")+
+  geom_ribbon(aes(ymax=pred_zoo_2_0.5$fit + 2*pred_zoo_2_0.5$se.fit,ymin=pred_zoo_2_0.5$fit - 2*pred_zoo_2_0.5$se.fit,x=small_data[,1]),
+              fill = "firebrick1",alpha = 0.6)+
+  geom_ribbon(aes(ymax=pred_zoo_2_0.9$fit + 2*pred_zoo_2_0.9$se.fit,ymin=pred_zoo_2_0.9$fit - 2*pred_zoo_2_0.9$se.fit,x=small_data[,1]),
+              fill = "dodgerblue",alpha = 0.6)+
+  geom_line(aes(y=pred_zoo_2_0.5$fit,x=small_data[,1]),data=small_data,colour="red",size=1.3)+
+  geom_line(aes(y=pred_zoo_2_0.9$fit,x=small_data[,1]),data=small_data,colour="blue",size=1.3,linetype="dashed")+
+  geom_point(aes(y=small_data[,3],x=small_data[,1]),data=small_data,size=1.7)+
+  theme(axis.title.x = element_text(color = "grey20", size = 15, angle = 0, hjust = .5, vjust = 0, face = "plain"),
+        axis.title.y = element_text(color = "grey20", size = 15, angle = 90, hjust = .5, vjust = .5, face = "plain"))
+
+tiff("Plot_zoo_annex.tiff", res=300, height=8, width=12,units = "in" )
+#grid.arrange(pl_0,pl_2,ncol=2)
+pl_2
 dev.off()
 
 #######################################################
@@ -490,4 +539,67 @@ grid.arrange(p7+ labs(title ="A)"),
              p7_not_lim+ labs(title ="C)"),ncol=2)
 
 dev.off()
+
+######## Ricker nolinear #######
+library(quantreg)
+library(nlraa)
+
+df1<-na.omit(data.frame(age0=data$H_0,SSB=data$SSB_H))
+df2<-na.omit(data.frame(age2=data$H_R2,SSB=data$SSB_H))
+df1<-df1[order(df1$SSB),]
+df2<-df2[order(df2$SSB),]
+
+
+fit_0_0.5 <- nlrq(age0 ~ SSricker(SSB, a, b), data = df1, tau=0.5)
+fit_0_0.9 <- nlrq(age0 ~ SSricker(SSB, a, b), data = df1, tau=0.9)
+fit_2_0.5 <- nlrq(age2 ~ SSricker(SSB, a, b), data = df2, tau=0.5)
+fit_2_0.9 <- nlrq(age2 ~ SSricker(SSB, a, b), data = df2, tau=0.9)
+
+summary(fit_2_0.5)
+summary(fit_2_0.9)
+summary(fit_0_0.5)
+summary(fit_0_0.9)
+
+summary(fit_2_0.5)$coeff[1,1]
+summary(fit_2_0.5)$coeff[2,1]
+
+SSB<-seq(0,8000, by=100)
+R.c<-summary(fit_2_0.5)$coeff[1,1]*SSB*exp(-summary(fit_2_0.5)$coeff[2,1]*SSB)
+R<-summary(fit_2_0.9)$coeff[1,1]*SSB*exp(-summary(fit_2_0.9)$coeff[2,1]*SSB)
+
+
+R_low<-(summary(fit_2_0.9)$coeff[1,1]-summary(fit_2_0.9)$coeff[1,2]*summary(fit_2_0.9)$coeff[1,3])*
+  SSB*exp(-(summary(fit_2_0.9)$coeff[2,1]-summary(fit_2_0.9)$coeff[2,2]*summary(fit_2_0.9)$coeff[2,3])*SSB) 
+
+R_up<-(summary(fit_2_0.5)$coeff[1,1]+summary(fit_2_0.5)$coeff[1,2]*summary(fit_2_0.5)$coeff[1,3])*
+  SSB*exp(-(summary(fit_2_0.5)$coeff[2,1]+summary(fit_2_0.5)$coeff[2,2]*summary(fit_2_0.5)$coeff[2,3])*SSB) 
+
+R_low.c<-(summary(fit_2_0.5)$coeff[1,1]-summary(fit_2_0.5)$coeff[1,2]*summary(fit_2_0.5)$coeff[1,3])*
+  SSB*exp(-(summary(fit_2_0.5)$coeff[2,1]-summary(fit_2_0.5)$coeff[2,2]*summary(fit_2_0.5)$coeff[2,3])*SSB) 
+
+R_up.c<-(summary(fit_2_0.5)$coeff[1,1]+summary(fit_2_0.5)$coeff[1,2]*summary(fit_2_0.5)$coeff[1,3])*
+  SSB*exp(-(summary(fit_2_0.5)$coeff[2,1]+summary(fit_2_0.5)$coeff[2,2]*summary(fit_2_0.5)$coeff[2,3])*SSB) 
+
+
+ggplot()+ #H2~SSB with confidence interval
+  xlab("SSB")+
+  ylab("HR2")+
+  #ylim(0,75000)+
+  #ylim(0,700000)+
+  geom_ribbon(aes(ymax=R_up,
+                  ymin=R_low,x=SSB),
+              fill = "dodgerblue",alpha = 0.6)+
+  geom_ribbon(aes(ymax=R_up.c,
+                  ymin=R_low.c,x=SSB),
+              fill = "firebrick1",alpha = 0.6)+
+  geom_line(aes(y=R.c,x=SSB.c),colour="red",size=1.3)+
+  geom_line(aes(y=R,x=SSB),colour="blue",size=1.3,linetype="dashed")+
+  geom_point(aes(y=age2,x=SSB),data=df2,size=1.7)+
+  #geom_point(aes(y=H_R2,x=SSB_H),data=aber,size=1.7,colour="red")+
+  theme(axis.title.x = element_text(color = "grey20", size = 15, angle = 0, hjust = .5, vjust = 0, face = "plain"),
+        axis.title.y = element_text(color = "grey20", size = 15, angle = 90, hjust = .5, vjust = .5, face = "plain"))+ 
+  coord_cartesian(ylim = c(0,800000), xlim =c(0,8000))
+
+
+
 
